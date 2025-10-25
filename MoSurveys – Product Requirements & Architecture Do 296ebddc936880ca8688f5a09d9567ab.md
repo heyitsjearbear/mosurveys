@@ -114,7 +114,7 @@ It leverages:
 5. **Save Flow:**
     - Inserts survey + questions into Supabase.
     - Exports JSON object to `/public/surveys.txt`.
-    - Generates a QR code linking to `/respond/[surveyId]`.
+    - Generates shareable localhost link to `/respond/[surveyId]`.
     - Triggers webhook `/api/webhook/sync` with event `SURVEY_CREATED`.
     - Emits realtime update to dashboard feed.
 
@@ -165,7 +165,7 @@ It leverages:
 - Switch between **Grid** and **Table** view using Context.
 - Filter by audience, creation date, or sentiment.
 - Edit / Delete / Clone (increment version numbers).
-- Download QR code and open analytics in one click.
+- Copy survey link and open analytics in one click.
 
 ---
 
@@ -209,7 +209,6 @@ responses * ─ 1 activity_feed  ◀─  webhooks
 | version | numeric | Version (e.g., 1.0, 1.1) |
 | parent_id | uuid (fk) | Reference to previous version |
 | changelog | text | Description of edits |
-| qr_url | text | Survey QR code URL |
 | ai_suggestions | jsonb | OpenAI-generated question suggestions |
 | created_at | timestamptz | Default now() |
 
@@ -334,12 +333,11 @@ responses * ─ 1 activity_feed  ◀─  webhooks
     surveys/save/route.ts
     responses/submit/route.ts
     webhook/sync/route.ts
-    qrcode/route.ts
     openai/generate/route.ts
     openai/analyze/route.ts
 /components/
   ActivityFeed.tsx  SurveyList.tsx  SurveyQuestionEditor.tsx
-  AnalyticsCards.tsx  QRCodePreview.tsx  ErrorState.tsx
+  AnalyticsCards.tsx  ErrorState.tsx
 /context/
   OrgContext.tsx  UIContext.tsx
 /hooks/
@@ -390,7 +388,7 @@ responses * ─ 1 activity_feed  ◀─  webhooks
 
 ✅ **Leverages OpenAI API** for contextual question generation and sentiment analysis.
 
-✅ **Implements version control, QR generation, and analytics dashboards.**
+✅ **Implements version control, shareable links, and analytics dashboards.**
 
 ✅ **Offline-safe** — AI endpoints are optional with graceful fallbacks.
 

@@ -6,7 +6,13 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    
+    "db:push": "supabase db push",
+    "db:types": "supabase gen types typescript --linked > src/types/supabase.ts",
+    "db:migration": "supabase migration new",
+    "db:status": "supabase status",
+    "db:studio": "supabase db remote open"
   },
   "dependencies": {
     "next": "16.0.0",
