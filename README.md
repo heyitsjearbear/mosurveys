@@ -192,7 +192,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser. 🚀
 mosurveys/
 ├── src/
 │   ├── app/                    # Next.js App Router
-│   │   ├── mosurveys/         # Survey routes
+│   │   ├── mojeremiah/        # Survey routes
 │   │   │   ├── page.tsx       # Dashboard
 │   │   │   ├── create/        # Survey builder
 │   │   │   ├── view/          # Manage surveys
@@ -265,11 +265,11 @@ npm run db:studio    # Open Supabase Studio in browser
 
 ### Creating a Survey
 
-1. Navigate to `/mosurveys/create`
+1. Navigate to `/mojeremiah/create`
 2. Fill in survey title and audience
 3. Add questions (text, multiple choice, rating, yes/no)
 4. Save - survey is stored in Supabase
-5. Share the response link: `http://localhost:3000/mosurveys/respond/[surveyId]`
+5. Share the response link: `http://localhost:3000/mojeremiah/respond/[surveyId]`
 
 ### Sharing Surveys on Local Network
 
@@ -286,7 +286,7 @@ To allow other devices on your network to access surveys:
 
 2. Share this link format:
    ```
-   http://192.168.1.X:3000/mosurveys/respond/[surveyId]
+   http://192.168.1.X:3000/mojeremiah/respond/[surveyId]
    ```
 
 ---

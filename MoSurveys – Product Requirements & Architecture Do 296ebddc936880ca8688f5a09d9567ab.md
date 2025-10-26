@@ -19,11 +19,11 @@ It leverages:
 
 | Feature | Description |
 | --- | --- |
-| **Landing Dashboard** (`/mosurveys`) | Displays real-time survey metrics (Total Responses, Avg NPS, Sentiment %) and an activity feed synced via Supabase Realtime. |
-| **Survey Builder** (`/mosurveys/create`) | Step-by-step builder with validation, AI question generation, and Supabase persistence. |
-| **Manage View** (`/mosurveys/view`) | View, edit, filter, clone, and version surveys with a grid/table layout toggle. |
-| **Response Form** (`/mosurveys/respond/[surveyId]`) | Public form for customers to take surveys; submissions trigger analytics updates and sentiment classification. |
-| **Analytics Dashboard** (`/mosurveys/analytics/[surveyId]`) | Displays computed metrics such as NPS, sentiment distribution, and AI-generated summaries. |
+| **Landing Dashboard** (`/mojeremiah`) | Displays real-time survey metrics (Total Responses, Avg NPS, Sentiment %) and an activity feed synced via Supabase Realtime. |
+| **Survey Builder** (`/mojeremiah/create`) | Step-by-step builder with validation, AI question generation, and Supabase persistence. |
+| **Manage View** (`/mojeremiah/view`) | View, edit, filter, clone, and version surveys with a grid/table layout toggle. |
+| **Response Form** (`/mojeremiah/respond/[surveyId]`) | Public form for customers to take surveys; submissions trigger analytics updates and sentiment classification. |
+| **Analytics Dashboard** (`/mojeremiah/analytics/[surveyId]`) | Displays computed metrics such as NPS, sentiment distribution, and AI-generated summaries. |
 | **Realtime Webhooks** | Logs survey creation and responses in the `activity_feed` table for cross-app visibility. |
 | **OpenAI Integration** | `/api/openai/generate` for question drafts; `/api/openai/analyze` for response sentiment. |
 
@@ -46,7 +46,7 @@ It leverages:
     - OpenAI API for AI-powered generation and classification
     - Webhooks for modular communication
 4. **Fulfill every deliverable from the assignment doc:**
-    - Pages: `/mosurveys`, `/create`, `/view`
+    - Pages: `/mojeremiah`, `/create`, `/view`
     - JSON/TXT export of survey data
     - Validation, error handling, and seeded schema
     - Responsive design across devices
@@ -55,7 +55,7 @@ It leverages:
 
 ## **3. User Experience & Screens**
 
-### **`/mosurveys` – Landing Dashboard**
+### **`/mojeremiah` – Landing Dashboard**
 
 **Purpose:** Overview of survey health and engagement.
 
@@ -81,7 +81,7 @@ It leverages:
 
 ---
 
-### **`/mosurveys/create` – Survey Builder**
+### **`/mojeremiah/create` – Survey Builder**
 
 **Workflow:**
 
@@ -120,7 +120,7 @@ It leverages:
 
 ---
 
-### **`/mosurveys/respond/[surveyId]` – Public Survey Form**
+### **`/mojeremiah/respond/[surveyId]` – Public Survey Form**
 
 **Purpose:** Collect customer feedback anonymously or by email.
 
@@ -155,7 +155,7 @@ It leverages:
 
 ---
 
-### **`/mosurveys/view` – Manage Surveys**
+### **`/mojeremiah/view` – Manage Surveys**
 
 **Purpose:** Provide CRUD and version control for surveys.
 
@@ -169,7 +169,7 @@ It leverages:
 
 ---
 
-### **`/mosurveys/analytics/[surveyId]` – Insights Dashboard**
+### **`/mojeremiah/analytics/[surveyId]` – Insights Dashboard**
 
 **Purpose:** Provide high-level analytics and summaries.
 
@@ -323,7 +323,7 @@ responses * ─ 1 activity_feed  ◀─  webhooks
 
 ```
 /app/
-  /mosurveys/
+  /mojeremiah/
     page.tsx                        # Dashboard
     create/page.tsx                 # Survey Builder
     view/page.tsx                   # Manage Surveys
