@@ -10,21 +10,31 @@ import { Step2AddQuestions } from "@/components/survey/create/Step2AddQuestions"
 import { Step3Review } from "@/components/survey/create/Step3Review";
 import { NavigationButtons } from "@/components/survey/create/NavigationButtons";
 import { PublishModal } from "@/components/survey/create/PublishModal";
+import { AIPreviewModal } from "@/components/survey/create/AIPreviewModal";
 
 // ─────────────────────────────────────────────
 // Survey Creation Page
 // ─────────────────────────────────────────────
 
+// Get default org ID from environment or use fallback
+const DEFAULT_ORG_ID = process.env.NEXT_PUBLIC_DEFAULT_ORG_ID || '00000000-0000-0000-0000-000000000001';
+
 export default function CreateSurveyPage() {
   // State management
   const [currentStep, setCurrentStep] = useState(1);
   const [showPublishModal, setShowPublishModal] = useState(false);
+  const [publishedSurveyId, setPublishedSurveyId] = useState<string | null>(null);
   
   // Survey builder hook
   const {
     surveyData,
     setSurveyData,
     isGeneratingAI,
+    showAIPreview,
+    aiGeneratedQuestions,
+    isAIMock,
+    isPublishing,
+    publishError,
     addQuestion,
     updateQuestion,
     deleteQuestion,
@@ -32,6 +42,9 @@ export default function CreateSurveyPage() {
     updateOption,
     deleteOption,
     handleAIGenerate,
+    addSelectedAIQuestions,
+    closeAIPreview,
+    publishSurvey,
   } = useSurveyBuilder();
 
   // Constants
@@ -42,13 +55,18 @@ export default function CreateSurveyPage() {
   // Navigation Logic
   // ─────────────────────────────────────────────
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (currentStep < totalSteps) {
       setCurrentStep(currentStep + 1);
     } else {
-      // Final step - show publish modal
-      // TODO: Save survey to database before showing modal
-      setShowPublishModal(true);
+      // Final step - publish survey to database
+      const result = await publishSurvey(DEFAULT_ORG_ID);
+      
+      if (result.success && result.surveyId) {
+        setPublishedSurveyId(result.surveyId);
+        setShowPublishModal(true);
+      }
+      // Error is handled by the hook and displayed in UI
     }
   };
 
@@ -134,21 +152,48 @@ export default function CreateSurveyPage() {
         <div className="max-w-3xl mx-auto">
           {renderStepContent()}
 
+          {/* Error Message */}
+          {publishError && (
+            <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+              <p className="font-body text-sm text-red-700">{publishError}</p>
+            </div>
+          )}
+
           {/* Navigation Buttons */}
           <NavigationButtons
             currentStep={currentStep}
             totalSteps={totalSteps}
-            canProceed={canProceed()}
+            canProceed={canProceed() && !isPublishing}
             onBack={handleBack}
             onNext={handleNext}
           />
+
+          {/* Publishing Loading State */}
+          {isPublishing && (
+            <div className="mt-6 flex items-center justify-center gap-3">
+              <div className="w-6 h-6 border-3 border-[#2663EB] border-t-transparent rounded-full animate-spin"></div>
+              <p className="font-body text-sm text-slate-600">Publishing your survey...</p>
+            </div>
+          )}
         </div>
       </main>
 
-      {/* Publish Modal */}
-      {showPublishModal && (
+      {/* AI Preview Modal */}
+      {showAIPreview && (
+        <AIPreviewModal
+          questions={aiGeneratedQuestions}
+          isLoading={isGeneratingAI}
+          isMock={isAIMock}
+          onAddSelected={addSelectedAIQuestions}
+          onClose={closeAIPreview}
+        />
+      )}
+
+      {/* Publish Success Modal */}
+      {showPublishModal && publishedSurveyId && (
         <PublishModal
           surveyTitle={surveyData.title}
+          surveyId={publishedSurveyId}
           onClose={() => setShowPublishModal(false)}
         />
       )}

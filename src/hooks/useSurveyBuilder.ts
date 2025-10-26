@@ -13,6 +13,11 @@ export function useSurveyBuilder() {
     questions: [],
   });
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
+  const [showAIPreview, setShowAIPreview] = useState(false);
+  const [aiGeneratedQuestions, setAIGeneratedQuestions] = useState<Question[]>([]);
+  const [isAIMock, setIsAIMock] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
+  const [publishError, setPublishError] = useState<string | null>(null);
 
   // ─────────────────────────────────────────────
   // Question Management
@@ -79,48 +84,102 @@ export function useSurveyBuilder() {
   };
 
   // ─────────────────────────────────────────────
-  // AI Generation (Mock)
+  // AI Generation with Preview Modal
   // ─────────────────────────────────────────────
 
-  const handleAIGenerate = () => {
+  const handleAIGenerate = async () => {
     setIsGeneratingAI(true);
-    
-    // Simulate AI generation delay
-    // TODO: Replace with actual OpenAI API call
-    setTimeout(() => {
-      const aiQuestions: Question[] = [
-        {
-          id: `q-${Date.now()}-1`,
-          type: "rating",
-          text: "How would you rate your overall experience?",
-          required: true,
-        },
-        {
-          id: `q-${Date.now()}-2`,
-          type: "multiple_choice",
-          text: "What did you like most about our service?",
-          options: ["Quality", "Speed", "Price", "Support"],
-          required: true,
-        },
-        {
-          id: `q-${Date.now()}-3`,
-          type: "long_text",
-          text: "What could we improve?",
-          required: false,
-        },
-      ];
-      setSurveyData({
-        ...surveyData,
-        questions: [...surveyData.questions, ...aiQuestions],
+    setShowAIPreview(true);
+    setPublishError(null);
+
+    try {
+      const response = await fetch('/api/openai/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: surveyData.title,
+          description: surveyData.description,
+          audience: surveyData.audience
+        })
       });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setAIGeneratedQuestions(data.questions);
+        setIsAIMock(data.isMock || false);
+      } else {
+        throw new Error(data.error || 'Failed to generate questions');
+      }
+    } catch (error) {
+      console.error('AI generation error:', error);
+      setPublishError('Failed to generate questions. Please try again.');
+      setShowAIPreview(false);
+    } finally {
       setIsGeneratingAI(false);
-    }, 2000);
+    }
+  };
+
+  const addSelectedAIQuestions = (selectedQuestions: Question[]) => {
+    setSurveyData({
+      ...surveyData,
+      questions: [...surveyData.questions, ...selectedQuestions],
+    });
+    setShowAIPreview(false);
+    setAIGeneratedQuestions([]);
+  };
+
+  const closeAIPreview = () => {
+    setShowAIPreview(false);
+    setAIGeneratedQuestions([]);
+    setIsGeneratingAI(false);
+  };
+
+  // ─────────────────────────────────────────────
+  // Survey Publishing
+  // ─────────────────────────────────────────────
+
+  const publishSurvey = async (orgId: string): Promise<{ success: boolean; surveyId?: string; error?: string }> => {
+    setIsPublishing(true);
+    setPublishError(null);
+
+    try {
+      const response = await fetch('/api/surveys/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          surveyData,
+          orgId
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        return { success: true, surveyId: data.survey.id };
+      } else {
+        setPublishError(data.error || 'Failed to publish survey');
+        return { success: false, error: data.error };
+      }
+    } catch (error) {
+      console.error('Publish error:', error);
+      const errorMessage = 'Failed to publish survey. Please try again.';
+      setPublishError(errorMessage);
+      return { success: false, error: errorMessage };
+    } finally {
+      setIsPublishing(false);
+    }
   };
 
   return {
     surveyData,
     setSurveyData,
     isGeneratingAI,
+    showAIPreview,
+    aiGeneratedQuestions,
+    isAIMock,
+    isPublishing,
+    publishError,
     addQuestion,
     updateQuestion,
     deleteQuestion,
@@ -128,6 +187,9 @@ export function useSurveyBuilder() {
     updateOption,
     deleteOption,
     handleAIGenerate,
+    addSelectedAIQuestions,
+    closeAIPreview,
+    publishSurvey,
   };
 }
 

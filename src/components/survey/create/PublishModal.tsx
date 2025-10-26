@@ -10,17 +10,15 @@ import { ArrowRightIcon, CheckIcon } from "@heroicons/react/24/outline";
 
 interface PublishModalProps {
   surveyTitle: string;
-  surveyId?: string; // Optional for now (mock mode)
+  surveyId: string;
   onClose: () => void;
 }
 
 export function PublishModal({ surveyTitle, surveyId, onClose }: PublishModalProps) {
   const [copied, setCopied] = useState(false);
   
-  // Generate survey link (mock for now, will use real ID later)
-  const surveyLink = surveyId 
-    ? `${window.location.origin}/mojeremiah/respond/${surveyId}`
-    : "https://mosurveys.app/respond/abc123";
+  // Generate real survey link using published survey ID
+  const surveyLink = `${window.location.origin}/mojeremiah/respond/${surveyId}`;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(surveyLink);
@@ -55,7 +53,7 @@ export function PublishModal({ surveyTitle, surveyId, onClose }: PublishModalPro
               type="text"
               value={surveyLink}
               readOnly
-              className="flex-1 px-3 py-2 font-mono text-sm bg-white border border-slate-300 rounded-lg"
+              className="flex-1 px-3 py-2 font-mono text-sm text-slate-900 bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2663EB] focus:border-transparent select-all"
             />
             <button
               onClick={handleCopy}
