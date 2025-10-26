@@ -11,7 +11,8 @@
     "db:types": "supabase gen types typescript --linked > src/types/supabase.ts",
     "db:migration": "supabase migration new",
     "db:status": "supabase status",
-    "db:studio": "supabase db remote open"
+    "db:studio": "supabase db remote open",
+    "db:seed": "tsx scripts/seed-test-data.ts"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
@@ -30,6 +31,7 @@
     "eslint-config-next": "16.0.0",
     "supabase": "^2.53.6",
     "tailwindcss": "^4",
+    "tsx": "^4.7.0",
     "typescript": "^5"
   }
 }
