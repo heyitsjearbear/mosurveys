@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
+import type { ActivityEventType, ActivityDetails } from '@/types/activity'
+import { isValidEventType } from '@/types/activity'
 
 // ─────────────────────────────────────────────
 // Webhook Sync API Route
@@ -11,11 +13,11 @@ interface WebhookPayload {
   type: string
   survey_id?: string
   org_id: string
-  details?: Record<string, any>
+  details?: ActivityDetails
 }
 
-// Valid event types
-const VALID_EVENT_TYPES = [
+// Valid event types derived from our type-safe ActivityEventType
+const VALID_EVENT_TYPES: readonly ActivityEventType[] = [
   'SURVEY_CREATED',
   'RESPONSE_RECEIVED',
   'SURVEY_UPDATED',
@@ -43,8 +45,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Validate event type
-    if (!VALID_EVENT_TYPES.includes(payload.type as any)) {
+    // Validate event type using type guard
+    if (!isValidEventType(payload.type)) {
       console.error('❌ Invalid event type:', payload.type)
       return NextResponse.json(
         { 

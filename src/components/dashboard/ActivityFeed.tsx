@@ -13,6 +13,14 @@ import {
 } from "@heroicons/react/24/outline";
 import { supabase } from "@/lib/supabaseClient";
 import type { Database } from "@/types/supabase";
+import type { 
+  ActivityDetails, 
+  SurveyCreatedDetails,
+  ResponseReceivedDetails,
+  SurveyUpdatedDetails,
+  SurveyDeletedDetails,
+  SummaryGeneratedDetails
+} from "@/types/activity";
 
 type ActivityFeedRow = Database["public"]["Tables"]["activity_feed"]["Row"];
 
@@ -198,20 +206,41 @@ export default function ActivityFeed() {
   };
 
   // Helper function to get description from details
+  // 
+  // Industry Practice: Type Narrowing with Switch Statements
+  // ─────────────────────────────────────────────────────────
+  // By casting to the specific detail type inside each case,
+  // TypeScript knows exactly what fields are available.
+  // This gives us:
+  // 1. Full autocomplete for each event type
+  // 2. Compile-time errors if we access wrong fields
+  // 3. No need for optional chaining (?.) on required fields
   const getActivityDescription = (activity: ActivityFeedRow) => {
-    const details = activity.details as any;
+    // Cast through 'unknown' when converting from Supabase Json type to our types
+    // This is the standard pattern for JSONB fields from databases
+    const details = activity.details as unknown as ActivityDetails;
     
     switch (activity.type) {
-      case "SURVEY_CREATED":
-        return `Survey "${details?.survey_title || "Untitled"}" created with ${details?.question_count || 0} question${details?.question_count !== 1 ? "s" : ""}`;
-      case "RESPONSE_RECEIVED":
-        return `New response received for "${details?.survey_title || "survey"}"`;
-      case "SURVEY_UPDATED":
-        return `Survey "${details?.survey_title || "Untitled"}" was updated`;
-      case "SURVEY_DELETED":
-        return `Survey "${details?.survey_title || "Untitled"}" was deleted`;
-      case "SUMMARY_GENERATED":
-        return `AI summary generated for "${details?.survey_title || "survey"}"`;
+      case "SURVEY_CREATED": {
+        const d = details as SurveyCreatedDetails;
+        return `Survey "${d.survey_title}" created with ${d.question_count} question${d.question_count !== 1 ? "s" : ""}`;
+      }
+      case "RESPONSE_RECEIVED": {
+        const d = details as ResponseReceivedDetails;
+        return `New response received for "${d.survey_title}"`;
+      }
+      case "SURVEY_UPDATED": {
+        const d = details as SurveyUpdatedDetails;
+        return `Survey "${d.survey_title}" was updated`;
+      }
+      case "SURVEY_DELETED": {
+        const d = details as SurveyDeletedDetails;
+        return `Survey "${d.survey_title}" was deleted`;
+      }
+      case "SUMMARY_GENERATED": {
+        const d = details as SummaryGeneratedDetails;
+        return `AI summary generated for "${d.survey_title}"`;
+      }
       default:
         return "Activity event";
     }
@@ -329,9 +358,10 @@ export default function ActivityFeed() {
                   </div>
                   
                   {/* Additional details if present */}
-                  {activity.details && typeof activity.details === 'object' && (activity.details as any).audience && (
+                  {/* Type-safe audience display - only SURVEY_CREATED events have audience */}
+                  {activity.type === 'SURVEY_CREATED' && activity.details && (
                     <p className="font-body text-xs text-slate-500 mt-1">
-                      Audience: {(activity.details as any).audience}
+                      Audience: {(activity.details as unknown as SurveyCreatedDetails).audience}
                     </p>
                   )}
                 </div>
