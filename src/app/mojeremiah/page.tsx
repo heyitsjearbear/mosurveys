@@ -10,6 +10,9 @@ import {
   ArrowRightIcon,
 } from "@heroicons/react/24/outline";
 import { ActivityFeed, StatCard, StepCard, InsightCard } from "@/components/dashboard";
+import { useDashboardStats } from "@/hooks/useDashboardStats";
+import LoadingState from "@/components/common/LoadingState";
+import ErrorState from "@/components/common/ErrorState";
 
 /**
  * MoSurveys Landing Page (Dashboard)
@@ -22,6 +25,7 @@ import { ActivityFeed, StatCard, StepCard, InsightCard } from "@/components/dash
  */
 export default function MoJeremiahDashboard() {
   const [activeSection, setActiveSection] = useState<string>("overview");
+  const { stats, loading, error } = useDashboardStats();
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -128,30 +132,65 @@ export default function MoJeremiahDashboard() {
         {/* Overview Section - Shows when overview is active */}
         {activeSection === "overview" && (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              {/* Quick Stats Cards */}
-              <StatCard
-                title="Total Surveys"
-                value="0"
-                description="No surveys created yet"
-                icon={<ClipboardDocumentListIcon className="w-6 h-6" />}
-                color="blue"
-              />
-              <StatCard
-                title="Total Responses"
-                value="0"
-                description="No responses collected yet"
-                icon={<ChatBubbleLeftRightIcon className="w-6 h-6" />}
-                color="green"
-              />
-              <StatCard
-                title="Active Surveys"
-                value="0"
-                description="No active surveys"
-                icon={<CheckCircleIcon className="w-6 h-6" />}
-                color="purple"
-              />
-            </div>
+            {/* Loading State */}
+            {loading && (
+              <div className="mb-8">
+                <LoadingState message="Loading dashboard stats..." />
+              </div>
+            )}
+
+            {/* Error State */}
+            {error && (
+              <div className="mb-8">
+                <ErrorState message={error} />
+              </div>
+            )}
+
+            {/* Stats Cards - Show when data is loaded */}
+            {!loading && !error && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                {/* Quick Stats Cards */}
+                <StatCard
+                  title="Total Surveys"
+                  value={stats.totalSurveys.toString()}
+                  description={
+                    stats.totalSurveys === 0
+                      ? "No surveys created yet"
+                      : stats.totalSurveys === 1
+                      ? "1 survey created"
+                      : `${stats.totalSurveys} surveys created`
+                  }
+                  icon={<ClipboardDocumentListIcon className="w-6 h-6" />}
+                  color="blue"
+                />
+                <StatCard
+                  title="Total Responses"
+                  value={stats.totalResponses.toString()}
+                  description={
+                    stats.totalResponses === 0
+                      ? "No responses collected yet"
+                      : stats.totalResponses === 1
+                      ? "1 response collected"
+                      : `${stats.totalResponses} responses collected`
+                  }
+                  icon={<ChatBubbleLeftRightIcon className="w-6 h-6" />}
+                  color="green"
+                />
+                <StatCard
+                  title="Active Surveys"
+                  value={stats.activeSurveys.toString()}
+                  description={
+                    stats.activeSurveys === 0
+                      ? "No active surveys"
+                      : stats.activeSurveys === 1
+                      ? "1 survey accepting responses"
+                      : `${stats.activeSurveys} surveys accepting responses`
+                  }
+                  icon={<CheckCircleIcon className="w-6 h-6" />}
+                  color="purple"
+                />
+              </div>
+            )}
 
             {/* Activity Feed Component */}
             <div className="mb-8">

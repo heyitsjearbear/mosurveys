@@ -154,6 +154,7 @@ export type Database = {
           id: string
           org_id: string
           parent_id: string | null
+          status: string
           title: string
           updated_at: string
           version: number
@@ -166,6 +167,7 @@ export type Database = {
           id?: string
           org_id: string
           parent_id?: string | null
+          status?: string
           title: string
           updated_at?: string
           version?: number
@@ -178,6 +180,7 @@ export type Database = {
           id?: string
           org_id?: string
           parent_id?: string | null
+          status?: string
           title?: string
           updated_at?: string
           version?: number
