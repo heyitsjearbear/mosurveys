@@ -86,23 +86,35 @@ export async function POST(request: NextRequest) {
     // Step 3: Trigger webhook for activity feed
     try {
       const webhookUrl = `${request.nextUrl.origin}/api/webhook/sync`
-      await fetch(webhookUrl, {
+      console.log('📡 Calling webhook:', webhookUrl)
+      
+      const webhookPayload = {
+        type: 'SURVEY_CREATED',
+        survey_id: survey.id,
+        org_id: orgId,
+        details: {
+          survey_title: survey.title,
+          question_count: surveyData.questions.length,
+          audience: survey.audience
+        }
+      }
+      console.log('📦 Webhook payload:', webhookPayload)
+      
+      const webhookResponse = await fetch(webhookUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          type: 'SURVEY_CREATED',
-          survey_id: survey.id,
-          org_id: orgId,
-          details: {
-            survey_title: survey.title,
-            question_count: surveyData.questions.length,
-            audience: survey.audience
-          }
-        })
+        body: JSON.stringify(webhookPayload)
       })
+      
+      const webhookResult = await webhookResponse.json()
+      console.log('✅ Webhook response:', webhookResult)
+      
+      if (!webhookResponse.ok) {
+        console.error('⚠️ Webhook failed with status:', webhookResponse.status, webhookResult)
+      }
     } catch (webhookError) {
       // Log but don't fail - survey was created successfully
-      console.error('Webhook error (non-critical):', webhookError)
+      console.error('❌ Webhook error (non-critical):', webhookError)
     }
 
     // Step 4: Return success with survey ID and shareable link

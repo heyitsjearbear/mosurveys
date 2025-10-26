@@ -49,26 +49,18 @@ export default function MoJeremiahDashboard() {
               >
                 Overview
               </button>
-              <button
-                onClick={() => setActiveSection("surveys")}
-                className={`px-3 py-2 font-accent text-sm font-medium rounded-lg transition-all duration-200 ${
-                  activeSection === "surveys"
-                    ? "text-[#2663EB] bg-blue-50"
-                    : "text-slate-700 hover:text-[#2663EB] hover:bg-slate-50"
-                }`}
+              <Link
+                href="/mojeremiah/view"
+                className="px-3 py-2 font-accent text-sm font-medium rounded-lg transition-all duration-200 text-slate-700 hover:text-[#2663EB] hover:bg-slate-50"
               >
                 Surveys
-              </button>
-              <button
-                onClick={() => setActiveSection("activity")}
-                className={`px-3 py-2 font-accent text-sm font-medium rounded-lg transition-all duration-200 ${
-                  activeSection === "activity"
-                    ? "text-[#2663EB] bg-blue-50"
-                    : "text-slate-700 hover:text-[#2663EB] hover:bg-slate-50"
-                }`}
+              </Link>
+              <Link
+                href="/mojeremiah/activity"
+                className="px-3 py-2 font-accent text-sm font-medium rounded-lg transition-all duration-200 text-slate-700 hover:text-[#2663EB] hover:bg-slate-50"
               >
                 Activity Feed
-              </button>
+              </Link>
               <button
                 onClick={() => setActiveSection("insights")}
                 className={`px-3 py-2 font-accent text-sm font-medium rounded-lg transition-all duration-200 ${
@@ -109,26 +101,18 @@ export default function MoJeremiahDashboard() {
             >
               Overview
             </button>
-            <button
-              onClick={() => setActiveSection("surveys")}
-              className={`px-3 py-2 font-accent text-sm font-medium rounded-lg whitespace-nowrap ${
-                activeSection === "surveys"
-                  ? "text-[#2663EB] bg-blue-50"
-                  : "text-slate-700"
-              }`}
+            <Link
+              href="/mojeremiah/view"
+              className="px-3 py-2 font-accent text-sm font-medium rounded-lg whitespace-nowrap text-slate-700"
             >
               Surveys
-            </button>
-            <button
-              onClick={() => setActiveSection("activity")}
-              className={`px-3 py-2 font-accent text-sm font-medium rounded-lg whitespace-nowrap ${
-                activeSection === "activity"
-                  ? "text-[#2663EB] bg-blue-50"
-                  : "text-slate-700"
-              }`}
+            </Link>
+            <Link
+              href="/mojeremiah/activity"
+              className="px-3 py-2 font-accent text-sm font-medium rounded-lg whitespace-nowrap text-slate-700"
             >
               Activity
-            </button>
+            </Link>
             <button
               onClick={() => setActiveSection("insights")}
               className={`px-3 py-2 font-accent text-sm font-medium rounded-lg whitespace-nowrap ${

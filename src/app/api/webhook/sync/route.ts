@@ -25,11 +25,15 @@ const VALID_EVENT_TYPES = [
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('🎯 Webhook received')
+    
     // Parse request body
     const payload: WebhookPayload = await request.json()
+    console.log('📨 Webhook payload:', payload)
 
     // Validate required fields
     if (!payload.type || !payload.org_id) {
+      console.error('❌ Missing required fields:', { type: payload.type, org_id: payload.org_id })
       return NextResponse.json(
         { 
           success: false, 
@@ -41,6 +45,7 @@ export async function POST(request: NextRequest) {
 
     // Validate event type
     if (!VALID_EVENT_TYPES.includes(payload.type as any)) {
+      console.error('❌ Invalid event type:', payload.type)
       return NextResponse.json(
         { 
           success: false, 
@@ -51,6 +56,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Insert into activity_feed table
+    console.log('💾 Inserting into activity_feed...')
     const { data, error } = await supabaseAdmin
       .from('activity_feed')
       .insert({
@@ -62,15 +68,18 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error('Error inserting activity:', error)
+      console.error('❌ Error inserting activity:', error)
       return NextResponse.json(
         { 
           success: false, 
-          error: 'Failed to log activity' 
+          error: 'Failed to log activity',
+          details: error.message
         },
         { status: 500 }
       )
     }
+
+    console.log('✅ Activity logged successfully:', data)
 
     // Return success response
     return NextResponse.json({
@@ -79,11 +88,12 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Webhook sync error:', error)
+    console.error('❌ Webhook sync error:', error)
     return NextResponse.json(
       { 
         success: false, 
-        error: 'Internal server error' 
+        error: 'Internal server error',
+        details: error instanceof Error ? error.message : 'Unknown error'
       },
       { status: 500 }
     )
