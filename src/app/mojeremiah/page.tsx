@@ -11,6 +11,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { ActivityFeed, StatCard, StepCard, InsightCard } from "@/components/dashboard";
 import { useDashboardStats } from "@/hooks/useDashboardStats";
+import { useInsightsData } from "@/hooks/useInsightsData";
 import LoadingState from "@/components/common/LoadingState";
 import ErrorState from "@/components/common/ErrorState";
 
@@ -26,6 +27,7 @@ import ErrorState from "@/components/common/ErrorState";
 export default function MoJeremiahDashboard() {
   const [activeSection, setActiveSection] = useState<string>("overview");
   const { stats, loading, error } = useDashboardStats();
+  const { data: insightsData, loading: insightsLoading, error: insightsError } = useInsightsData();
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -277,62 +279,234 @@ export default function MoJeremiahDashboard() {
         {/* Key Insights Section */}
         {activeSection === "insights" && (
           <div className="space-y-6">
-            <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-8">
-              <h3 className="font-heading text-lg font-semibold text-slate-900 mb-6">
-                Key Insights
-              </h3>
-              
-              {/* Empty State */}
-              <div className="text-center py-12">
-                <div className="mb-4">
-                  <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-[#2663EB] to-[#6366F1] rounded-full">
-                    <ChartBarIcon className="w-8 h-8 text-white" />
+            {/* Loading State */}
+            {insightsLoading && (
+              <LoadingState message="Loading insights..." />
+            )}
+
+            {/* Error State */}
+            {insightsError && (
+              <ErrorState message={insightsError} />
+            )}
+
+            {/* Insights Content */}
+            {!insightsLoading && !insightsError && insightsData && (
+              <>
+                {/* Empty State - No Responses */}
+                {insightsData.totalResponses === 0 && (
+                  <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-8">
+                    <div className="text-center py-12">
+                      <div className="mb-4">
+                        <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-[#2663EB] to-[#6366F1] rounded-full">
+                          <ChartBarIcon className="w-8 h-8 text-white" />
+                        </div>
+                      </div>
+                      <h4 className="font-heading text-lg font-medium text-slate-900 mb-2">
+                        No Insights Available Yet
+                      </h4>
+                      <p className="font-body text-slate-600 leading-relaxed mb-4">
+                        Insights will appear here once you start collecting survey responses.
+                      </p>
+                      <Link
+                        href="/mojeremiah/create"
+                        className="group inline-flex items-center gap-3 px-6 py-3 border border-transparent font-accent text-base font-medium rounded-full text-white bg-[#2663EB] hover:bg-[#2054C8] transition-all duration-200 hover:shadow-md active:scale-95"
+                      >
+                        <span className="relative w-6 h-6 rounded-full bg-white flex items-center justify-center overflow-hidden">
+                          <ArrowRightIcon className="w-4 h-4 text-[#2663EB] absolute -translate-x-8 group-hover:translate-x-0 transition-transform duration-300" />
+                        </span>
+                        Create Your First Survey
+                      </Link>
+                    </div>
                   </div>
-                </div>
-                <h4 className="font-heading text-lg font-medium text-slate-900 mb-2">
-                  No Insights Available
-                </h4>
-                <p className="font-body text-slate-600 leading-relaxed mb-4">
-                  Insights and analytics will appear here once you start collecting survey responses.
-                </p>
-              </div>
+                )}
 
-              {/* Insights Grid (placeholder for when there's data) */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 hidden">
-                {/* These will be populated with real insights later */}
-                <InsightCard
-                  title="Response Rate"
-                  value="0%"
-                  trend="neutral"
-                />
-                <InsightCard
-                  title="Avg. Completion Time"
-                  value="0 min"
-                  trend="neutral"
-                />
-              </div>
-            </div>
+                {/* Insights with Data */}
+                {insightsData.totalResponses > 0 && (
+                  <>
+                    {/* Overview Stats */}
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                      <StatCard
+                        title="Total Responses"
+                        value={insightsData.totalResponses.toString()}
+                        description={`Across ${insightsData.totalSurveys} surveys`}
+                        icon={<ChatBubbleLeftRightIcon className="w-6 h-6" />}
+                        color="blue"
+                      />
+                      <StatCard
+                        title="This Week"
+                        value={insightsData.responseTrend.thisWeek.toString()}
+                        description={`${insightsData.responseTrend.today} today`}
+                        icon={<ChartBarIcon className="w-6 h-6" />}
+                        color="green"
+                      />
+                      <StatCard
+                        title="Positive Sentiment"
+                        value={`${Math.round((insightsData.sentimentBreakdown.positive / insightsData.totalResponses) * 100)}%`}
+                        description={`${insightsData.sentimentBreakdown.positive} positive responses`}
+                        icon={<CheckCircleIcon className="w-6 h-6" />}
+                        color="green"
+                      />
+                      <StatCard
+                        title="Analysis Progress"
+                        value={`${insightsData.totalResponses - insightsData.sentimentBreakdown.unanalyzed}/${insightsData.totalResponses}`}
+                        description={`${insightsData.sentimentBreakdown.unanalyzed} pending`}
+                        icon={<ClipboardDocumentListIcon className="w-6 h-6" />}
+                        color="purple"
+                      />
+                    </div>
 
-            {/* Additional Insights Sections */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
-                <h4 className="font-heading text-md font-semibold text-slate-900 mb-4">
-                  Popular Questions
-                </h4>
-                <p className="font-body text-slate-500 text-sm">
-                  No data available yet
-                </p>
-              </div>
-              
-              <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
-                <h4 className="font-heading text-md font-semibold text-slate-900 mb-4">
-                  Recent Feedback
-                </h4>
-                <p className="font-body text-slate-500 text-sm">
-                  No data available yet
-                </p>
-              </div>
-            </div>
+                    {/* Sentiment Breakdown */}
+                    <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
+                      <h3 className="font-heading text-lg font-semibold text-slate-900 mb-4">
+                        Overall Sentiment Distribution
+                      </h3>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div className="text-center p-4 bg-green-50 rounded-lg">
+                          <p className="font-heading text-2xl font-semibold text-green-700">
+                            {insightsData.sentimentBreakdown.positive}
+                          </p>
+                          <p className="font-accent text-xs text-green-600 mt-1">Positive</p>
+                          <p className="font-body text-xs text-slate-500 mt-1">
+                            {Math.round((insightsData.sentimentBreakdown.positive / insightsData.totalResponses) * 100)}%
+                          </p>
+                        </div>
+                        <div className="text-center p-4 bg-slate-50 rounded-lg">
+                          <p className="font-heading text-2xl font-semibold text-slate-700">
+                            {insightsData.sentimentBreakdown.neutral}
+                          </p>
+                          <p className="font-accent text-xs text-slate-600 mt-1">Neutral</p>
+                          <p className="font-body text-xs text-slate-500 mt-1">
+                            {Math.round((insightsData.sentimentBreakdown.neutral / insightsData.totalResponses) * 100)}%
+                          </p>
+                        </div>
+                        <div className="text-center p-4 bg-red-50 rounded-lg">
+                          <p className="font-heading text-2xl font-semibold text-red-700">
+                            {insightsData.sentimentBreakdown.negative}
+                          </p>
+                          <p className="font-accent text-xs text-red-600 mt-1">Negative</p>
+                          <p className="font-body text-xs text-slate-500 mt-1">
+                            {Math.round((insightsData.sentimentBreakdown.negative / insightsData.totalResponses) * 100)}%
+                          </p>
+                        </div>
+                        <div className="text-center p-4 bg-amber-50 rounded-lg">
+                          <p className="font-heading text-2xl font-semibold text-amber-700">
+                            {insightsData.sentimentBreakdown.mixed}
+                          </p>
+                          <p className="font-accent text-xs text-amber-600 mt-1">Mixed</p>
+                          <p className="font-body text-xs text-slate-500 mt-1">
+                            {Math.round((insightsData.sentimentBreakdown.mixed / insightsData.totalResponses) * 100)}%
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Top Surveys and Recent Responses */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {/* Top Performing Surveys */}
+                      <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
+                        <h4 className="font-heading text-md font-semibold text-slate-900 mb-4">
+                          Top Performing Surveys
+                        </h4>
+                        <div className="space-y-3">
+                          {insightsData.topSurveys.slice(0, 5).map((item) => (
+                            <Link
+                              key={item.survey.id}
+                              href={`/mojeremiah/analytics/${item.survey.id}`}
+                              className="block p-3 rounded-lg hover:bg-slate-50 transition-colors duration-200 border border-transparent hover:border-slate-200"
+                            >
+                              <div className="flex items-center justify-between">
+                                <div className="flex-1 min-w-0">
+                                  <p className="font-body text-sm font-medium text-slate-900 truncate">
+                                    {item.survey.title}
+                                  </p>
+                                  <p className="font-body text-xs text-slate-500 mt-0.5">
+                                    v{item.survey.version} • {item.avgSentiment}
+                                  </p>
+                                </div>
+                                <div className="ml-4 flex-shrink-0">
+                                  <span className="inline-flex items-center px-2 py-1 bg-blue-100 text-[#2663EB] font-accent text-xs font-medium rounded-full">
+                                    {item.responseCount} responses
+                                  </span>
+                                </div>
+                              </div>
+                            </Link>
+                          ))}
+                          {insightsData.topSurveys.length === 0 && (
+                            <p className="font-body text-sm text-slate-500 text-center py-4">
+                              No survey data available yet
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      
+                      {/* Recent Responses */}
+                      <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
+                        <h4 className="font-heading text-md font-semibold text-slate-900 mb-4">
+                          Recent Feedback
+                        </h4>
+                        <div className="space-y-3">
+                          {insightsData.recentResponses.slice(0, 5).map((item) => {
+                            const timeAgo = (() => {
+                              const now = new Date();
+                              const responseTime = new Date(item.response.created_at);
+                              const diffMs = now.getTime() - responseTime.getTime();
+                              const diffMins = Math.floor(diffMs / 60000);
+                              const diffHours = Math.floor(diffMs / 3600000);
+                              const diffDays = Math.floor(diffMs / 86400000);
+                              
+                              if (diffMins < 60) return `${diffMins}m ago`;
+                              if (diffHours < 24) return `${diffHours}h ago`;
+                              return `${diffDays}d ago`;
+                            })();
+
+                            const sentimentColor = {
+                              positive: 'text-green-600 bg-green-100',
+                              negative: 'text-red-600 bg-red-100',
+                              neutral: 'text-slate-600 bg-slate-100',
+                              mixed: 'text-amber-600 bg-amber-100',
+                            }[item.response.sentiment || 'neutral'];
+
+                            const sentimentEmoji = {
+                              positive: '😊',
+                              negative: '😞',
+                              neutral: '😐',
+                              mixed: '🤔',
+                            }[item.response.sentiment || 'neutral'];
+
+                            return (
+                              <div
+                                key={item.response.id}
+                                className="p-3 rounded-lg border border-slate-200 hover:border-slate-300 transition-colors duration-200"
+                              >
+                                <div className="flex items-start justify-between mb-2">
+                                  <p className="font-body text-xs text-slate-500 flex-1">
+                                    {item.survey?.title || 'Unknown Survey'}
+                                  </p>
+                                  <span className={`inline-flex items-center gap-1 px-2 py-0.5 ${sentimentColor} font-accent text-xs font-medium rounded-full ml-2`}>
+                                    {sentimentEmoji}
+                                  </span>
+                                </div>
+                                <p className="font-body text-sm text-slate-700 line-clamp-2">
+                                  {item.response.summary || 'Response received'}
+                                </p>
+                                <p className="font-body text-xs text-slate-400 mt-1">
+                                  {timeAgo}
+                                </p>
+                              </div>
+                            );
+                          })}
+                          {insightsData.recentResponses.length === 0 && (
+                            <p className="font-body text-sm text-slate-500 text-center py-4">
+                              No recent responses yet
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </>
+            )}
           </div>
         )}
       </main>
