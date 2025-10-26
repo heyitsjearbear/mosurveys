@@ -23,33 +23,91 @@ A modern survey creation and management platform built with Next.js 15, TypeScri
 
 ## 📋 Prerequisites
 
-Before you begin, ensure you have the following installed:
-
+### For Everyone
 - **Node.js** 20.x or later ([Download](https://nodejs.org/))
 - **npm** (comes with Node.js)
-- **Supabase Account** ([Sign up free](https://supabase.com))
 - **Git**
+
+### Additional for Development (Path 2)
+- **Supabase Account** ([Sign up free](https://supabase.com))
+- **OpenAI API Key** (optional, for AI features)
+
+---
+
+## 🎯 Quick Start: Choose Your Path
+
+### Path 1: Just Running the App (Demo/Testing)
+**You DO NOT need your own Supabase project.**
+
+If you just want to run the app locally to test it:
+- Get the `.env` file from the project owner
+- The app will connect to the existing Supabase project
+- Perfect for: demos, testing, non-developers trying it out
+
+**Setup time**: ~2 minutes
+
+### Path 2: Active Development
+**You NEED your own Supabase project.**
+
+If you're developing features, contributing, or testing database changes:
+- Create your own Supabase project
+- Run migrations to set up your database
+- Use your own environment variables
+- Test freely without affecting production data
+
+**Setup time**: ~10 minutes
 
 ---
 
 ## 🚀 Getting Started
 
-### 1. Clone the Repository
+### For Demo/Testing (Path 1)
+
+#### 1. Clone the Repository
 
 ```bash
 git clone <your-repo-url>
 cd mosurveys
 ```
 
-### 2. Install Dependencies
+#### 2. Install Dependencies
 
 ```bash
 npm install
 ```
 
-### 3. Set Up Supabase
+#### 3. Get Environment Variables
 
-#### a) Create a Supabase Project
+Ask the project owner for the `.env` file and place it in the project root.
+
+#### 4. Run the App
+
+```bash
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) in your browser. ✨
+
+---
+
+### For Development (Path 2)
+
+#### 1. Clone the Repository
+
+```bash
+git clone <your-repo-url>
+cd mosurveys
+```
+
+#### 2. Install Dependencies
+
+```bash
+npm install
+```
+
+#### 3. Set Up Supabase
+
+##### a) Create a Supabase Project
 
 1. Go to [https://supabase.com/dashboard](https://supabase.com/dashboard)
 2. Click **"New Project"**
@@ -59,7 +117,7 @@ npm install
    - **Region**: Select closest to your location
    - **Plan**: Free (for development)
 
-#### b) Link Your Local Project
+##### b) Link Your Local Project
 
 After your Supabase project is created, get your project reference from the dashboard URL:
 ```
@@ -74,7 +132,7 @@ npx supabase link --project-ref YOUR_PROJECT_REF
 
 You'll be prompted to enter your database password.
 
-#### c) Apply Database Migrations
+##### c) Apply Database Migrations
 
 Create all necessary tables by running:
 
@@ -88,7 +146,7 @@ This creates the following tables:
 - `responses` - User responses with AI analysis
 - `activity_feed` - Event log for webhooks and tracking
 
-#### d) Generate TypeScript Types
+##### d) Generate TypeScript Types
 
 Generate type-safe interfaces from your database schema:
 
@@ -98,9 +156,9 @@ npm run db:types
 
 This creates `src/types/supabase.ts` with all your database types.
 
-### 4. Set Up Environment Variables
+#### 4. Set Up Environment Variables
 
-Create a `.env.local` file in the project root:
+Create a `.env` file in the project root:
 
 ```bash
 # Supabase Configuration
@@ -116,15 +174,15 @@ OPENAI_API_KEY=sk-...
 NEXT_PUBLIC_DEFAULT_ORG_ID=00000000-0000-0000-0000-000000000001
 ```
 
-**⚠️ Important**: Never commit `.env.local` to version control!
+**⚠️ Important**: Never commit `.env` to version control!
 
-### 5. Run the Development Server
+#### 5. Run the Development Server
 
 ```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+Open [http://localhost:3000](http://localhost:3000) in your browser. 🚀
 
 ---
 
@@ -268,7 +326,7 @@ The app includes optional OpenAI integration for:
 
 To enable AI features:
 1. Get an API key from [OpenAI](https://platform.openai.com/api-keys)
-2. Add `OPENAI_API_KEY` to `.env.local`
+2. Add `OPENAI_API_KEY` to `.env`
 3. The app will automatically use AI when available, with graceful fallbacks
 
 ---
@@ -328,26 +386,30 @@ npm run dev -- -p 3001
 
 ## 🤝 Contributing
 
-This is a local development project. If extending:
+### For Contributors
 
-1. Create a feature branch
-2. Make your changes
-3. Create a migration if database changes are needed
-4. Update types: `npm run db:types`
-5. Test thoroughly
-6. Commit with clear messages
+If you're contributing to the project, follow **Path 2** (Active Development) above to set up your own Supabase project.
 
----
+**Workflow**:
+1. Create your own Supabase project (don't use production)
+2. Create a feature branch
+3. Make your changes
+4. Create a migration if database changes are needed
+5. Update types: `npm run db:types`
+6. Test thoroughly in your environment
+7. Commit with clear messages
 
-## 📝 License
+### Sharing Your Work
 
-This project is for educational and local development purposes.
+When sharing with non-developers or for demos:
+- Simply provide your `.env` file (they follow **Path 1**)
+- They don't need Supabase access or to be added to your project
 
 ---
 
 ## 👨‍💻 Author
 
-Built by Jeremiah Ramiscal as part of the MoFlo Cloud ecosystem.
+Built by Jeremiah Ramiscal for the Mo-Something Activity
 
 ---
 
