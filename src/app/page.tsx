@@ -8,6 +8,7 @@ import {
   ShareIcon,
 } from "@heroicons/react/24/outline";
 import InteractiveSteps from "@/components/InteractiveSteps";
+import { FeatureCard } from "@/components/common";
 
 /**
  * MoSurveys Landing/Marketing Page
@@ -167,28 +168,6 @@ export default function Home() {
           </p>
         </div>
       </footer>
-    </div>
-  );
-}
-
-/**
- * FeatureCard Component
- * Displays a feature with icon, title, and description (no hover effects, blue icons without background)
- */
-interface FeatureCardProps {
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-}
-
-function FeatureCard({ icon, title, description }: FeatureCardProps) {
-  return (
-    <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
-      <div className="mb-4">
-        {icon}
-      </div>
-      <h4 className="font-heading text-lg font-semibold text-slate-900 mb-2">{title}</h4>
-      <p className="font-body text-slate-600 leading-relaxed">{description}</p>
     </div>
   );
 }

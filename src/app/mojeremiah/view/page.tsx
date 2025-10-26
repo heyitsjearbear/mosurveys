@@ -5,15 +5,12 @@ import Link from "next/link";
 import {
   ArrowLeftIcon,
   ClipboardDocumentListIcon,
-  PencilIcon,
-  TrashIcon,
-  DocumentDuplicateIcon,
-  LinkIcon,
-  ChartBarIcon,
   ArrowRightIcon,
 } from "@heroicons/react/24/outline";
 import { supabase } from "@/lib/supabaseClient";
 import type { Database } from "@/types/supabase";
+import { LoadingState, ErrorState, EmptyState } from "@/components/common";
+import { SurveyCard } from "@/components/survey/manage";
 
 type Survey = Database["public"]["Tables"]["surveys"]["Row"];
 
@@ -122,112 +119,35 @@ export default function SurveyViewPage() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Loading State */}
-        {loading && (
-          <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-12 text-center">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-[#2663EB] border-t-transparent"></div>
-            <p className="font-body text-slate-600 mt-4">Loading surveys...</p>
-          </div>
-        )}
+        {loading && <LoadingState message="Loading surveys..." />}
 
         {/* Error State */}
         {error && !loading && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-            <p className="font-body text-red-700">{error}</p>
-            <button
-              onClick={fetchSurveys}
-              className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200"
-            >
-              Try Again
-            </button>
-          </div>
+          <ErrorState message={error} onRetry={fetchSurveys} />
         )}
 
         {/* Empty State */}
         {!loading && !error && surveys.length === 0 && (
-          <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-12">
-            <div className="text-center max-w-md mx-auto">
-              <div className="mb-4">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full">
-                  <ClipboardDocumentListIcon className="w-8 h-8 text-[#2663EB]" />
-                </div>
-              </div>
-              <h3 className="font-heading text-xl font-semibold text-slate-900 mb-2">
-                No Surveys Yet
-              </h3>
-              <p className="font-body text-slate-600 leading-relaxed mb-6">
-                Get started by creating your first survey. Design questions, share with your audience, and collect valuable feedback.
-              </p>
-              <Link
-                href="/mojeremiah/create"
-                className="group inline-flex items-center gap-3 px-6 py-3 border border-transparent font-accent text-base font-medium rounded-full text-white bg-[#2663EB] hover:bg-[#2054C8] transition-all duration-200 hover:shadow-md active:scale-95 focus:ring-2 focus:ring-[#2663EB] focus:ring-offset-2"
-              >
-                <span className="relative w-6 h-6 rounded-full bg-white flex items-center justify-center overflow-hidden">
-                  <ArrowRightIcon className="w-4 h-4 text-[#2663EB] absolute -translate-x-8 group-hover:translate-x-0 transition-transform duration-300" />
-                </span>
-                Create Your First Survey
-              </Link>
-            </div>
-          </div>
+          <EmptyState
+            icon={<ClipboardDocumentListIcon className="w-8 h-8 text-[#2663EB]" />}
+            title="No Surveys Yet"
+            description="Get started by creating your first survey. Design questions, share with your audience, and collect valuable feedback."
+            actionLabel="Create Your First Survey"
+            actionHref="/mojeremiah/create"
+          />
         )}
 
         {/* Surveys Grid */}
         {!loading && !error && surveys.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {surveys.map((survey) => (
-              <div
+              <SurveyCard
                 key={survey.id}
-                className="bg-white rounded-lg shadow-sm border border-slate-200 p-6 transition-all duration-200 hover:shadow-md hover:scale-[1.02]"
-              >
-                {/* Survey Header */}
-                <div className="mb-4">
-                  <h3 className="font-heading text-lg font-semibold text-slate-900 mb-1">
-                    {survey.title}
-                  </h3>
-                  {survey.audience && (
-                    <p className="font-body text-sm text-slate-600">
-                      Audience: {survey.audience}
-                    </p>
-                  )}
-                  <div className="flex items-center gap-2 mt-2">
-                    <span className="inline-flex items-center px-2 py-1 bg-blue-100 text-[#2663EB] font-accent text-xs font-medium rounded-full">
-                      v{survey.version}
-                    </span>
-                    <span className="font-body text-xs text-slate-500">
-                      {new Date(survey.created_at).toLocaleDateString()}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Actions */}
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    onClick={() => handleCopyLink(survey.id)}
-                    className="inline-flex items-center gap-1 px-3 py-1.5 bg-slate-100 text-slate-700 hover:bg-slate-200 font-accent text-xs font-medium rounded-lg transition-colors duration-200"
-                    title="Copy shareable link"
-                  >
-                    <LinkIcon className="w-3.5 h-3.5" />
-                    {copiedId === survey.id ? "Copied!" : "Copy Link"}
-                  </button>
-                  
-                  <Link
-                    href={`/mojeremiah/analytics/${survey.id}`}
-                    className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-100 text-[#2663EB] hover:bg-blue-200 font-accent text-xs font-medium rounded-lg transition-colors duration-200"
-                    title="View analytics"
-                  >
-                    <ChartBarIcon className="w-3.5 h-3.5" />
-                    Analytics
-                  </Link>
-
-                  <button
-                    onClick={() => handleDelete(survey.id)}
-                    className="inline-flex items-center gap-1 px-3 py-1.5 bg-red-100 text-red-700 hover:bg-red-200 font-accent text-xs font-medium rounded-lg transition-colors duration-200"
-                    title="Delete survey"
-                  >
-                    <TrashIcon className="w-3.5 h-3.5" />
-                    Delete
-                  </button>
-                </div>
-              </div>
+                survey={survey}
+                copiedId={copiedId}
+                onCopyLink={handleCopyLink}
+                onDelete={handleDelete}
+              />
             ))}
           </div>
         )}
@@ -235,4 +155,3 @@ export default function SurveyViewPage() {
     </div>
   );
 }
-
