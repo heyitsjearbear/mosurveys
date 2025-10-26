@@ -11,7 +11,8 @@ import { supabase } from "@/lib/supabaseClient";
 import { createLogger } from "@/lib/logger";
 import type { Database } from "@/types/supabase";
 import { LoadingState, ErrorState, EmptyState, Toast, ConfirmModal } from "@/components/common";
-import { SurveyCard } from "@/components/survey/manage";
+import SurveyCard from "@/components/survey/manage/SurveyCard";
+import { VersionHistoryModal } from "@/components/survey/manage/VersionHistoryModal";
 import type { ToastType } from "@/components/common/Toast";
 
 const logger = createLogger('SurveyView');
@@ -49,9 +50,21 @@ export default function SurveyViewPage() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [toast, setToast] = useState<ToastState>({ message: "", type: "success", show: false });
+  const [showAllVersions, setShowAllVersions] = useState(false);
   
   // Confirmation modal state
   const [confirmModal, setConfirmModal] = useState<{
+    show: boolean;
+    surveyId: string | null;
+    surveyTitle: string;
+  }>({
+    show: false,
+    surveyId: null,
+    surveyTitle: "",
+  });
+
+  // Version history modal state
+  const [versionHistoryModal, setVersionHistoryModal] = useState<{
     show: boolean;
     surveyId: string | null;
     surveyTitle: string;
@@ -210,6 +223,47 @@ export default function SurveyViewPage() {
     setToast((prev) => ({ ...prev, show: false }));
   };
 
+  // ─────────────────────────────────────────────
+  // VERSION HISTORY HANDLER
+  // ─────────────────────────────────────────────
+  const handleViewHistory = (surveyId: string) => {
+    const survey = surveys.find((s) => s.id === surveyId);
+    if (!survey) return;
+
+    setVersionHistoryModal({
+      show: true,
+      surveyId: surveyId,
+      surveyTitle: survey.title,
+    });
+  };
+
+  const handleCloseVersionHistory = () => {
+    setVersionHistoryModal({ show: false, surveyId: null, surveyTitle: "" });
+  };
+
+  // ─────────────────────────────────────────────
+  // VERSION FILTERING LOGIC
+  // ─────────────────────────────────────────────
+  
+  /**
+   * Determines if a survey is the latest in its version family
+   * A survey is "latest" if no other survey has it as a parent_id
+   */
+  const isLatestVersion = (survey: Survey): boolean => {
+    // Check if any other survey has this survey as its parent
+    const hasChildVersion = surveys.some(s => s.parent_id === survey.id);
+    return !hasChildVersion;
+  };
+
+  /**
+   * Filter surveys based on showAllVersions toggle
+   * - If false (default): Only show latest versions
+   * - If true: Show all versions
+   */
+  const displayedSurveys = showAllVersions
+    ? surveys
+    : surveys.filter(survey => isLatestVersion(survey));
+
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
@@ -241,6 +295,33 @@ export default function SurveyViewPage() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Version Filter Toggle */}
+        {!loading && !error && surveys.length > 0 && (
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-4">
+              <p className="font-body text-sm text-slate-600">
+                Showing <span className="font-semibold text-slate-900">{displayedSurveys.length}</span> of {surveys.length} surveys
+              </p>
+              <button
+                onClick={() => setShowAllVersions(!showAllVersions)}
+                className={`inline-flex items-center gap-2 px-4 py-2 font-accent text-sm font-medium rounded-lg transition-all duration-200 ${
+                  showAllVersions
+                    ? 'bg-[#2663EB] text-white hover:bg-[#2054C8]'
+                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                }`}
+              >
+                <span className="text-base">{showAllVersions ? '📋' : '🔍'}</span>
+                {showAllVersions ? 'Show Latest Only' : 'Show All Versions'}
+              </button>
+            </div>
+            {!showAllVersions && displayedSurveys.length < surveys.length && (
+              <p className="font-body text-xs text-slate-500">
+                💡 {surveys.length - displayedSurveys.length} older version{surveys.length - displayedSurveys.length !== 1 ? 's' : ''} hidden
+              </p>
+            )}
+          </div>
+        )}
+
         {/* Loading State */}
         {loading && <LoadingState message="Loading surveys..." />}
 
@@ -261,9 +342,9 @@ export default function SurveyViewPage() {
         )}
 
         {/* Surveys Grid */}
-        {!loading && !error && surveys.length > 0 && (
+        {!loading && !error && displayedSurveys.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {surveys.map((survey) => (
+            {displayedSurveys.map((survey) => (
               <SurveyCard
                 key={survey.id}
                 survey={survey}
@@ -271,8 +352,25 @@ export default function SurveyViewPage() {
                 deletingId={deletingId}
                 onCopyLink={handleCopyLink}
                 onDelete={handleDeleteClick}
+                onViewHistory={handleViewHistory}
+                isLatest={isLatestVersion(survey)}
               />
             ))}
+          </div>
+        )}
+
+        {/* No Results After Filtering */}
+        {!loading && !error && surveys.length > 0 && displayedSurveys.length === 0 && (
+          <div className="text-center py-12">
+            <p className="font-body text-base text-slate-600 mb-4">
+              No latest versions found. All surveys have newer versions.
+            </p>
+            <button
+              onClick={() => setShowAllVersions(true)}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-[#2663EB] text-white font-accent text-sm font-medium rounded-lg hover:bg-[#2054C8] transition-colors duration-200"
+            >
+              Show All Versions
+            </button>
           </div>
         )}
       </main>
@@ -287,6 +385,16 @@ export default function SurveyViewPage() {
           onConfirm={handleDeleteConfirm}
           onCancel={handleDeleteCancel}
           isLoading={deletingId === confirmModal.surveyId}
+        />
+      )}
+
+      {/* Version History Modal */}
+      {versionHistoryModal.show && versionHistoryModal.surveyId && (
+        <VersionHistoryModal
+          surveyId={versionHistoryModal.surveyId}
+          currentSurveyId={versionHistoryModal.surveyId}
+          surveyTitle={versionHistoryModal.surveyTitle}
+          onClose={handleCloseVersionHistory}
         />
       )}
 

@@ -10,6 +10,7 @@ interface NavigationButtonsProps {
   canProceed: boolean;
   onBack: () => void;
   onNext: () => void;
+  finalButtonText?: string; // Optional custom text for final step button
 }
 
 export function NavigationButtons({
@@ -18,6 +19,7 @@ export function NavigationButtons({
   canProceed,
   onBack,
   onNext,
+  finalButtonText = "Publish Survey", // Default to "Publish Survey"
 }: NavigationButtonsProps) {
   const isFirstStep = currentStep === 1;
   const isFinalStep = currentStep === totalSteps;
@@ -58,7 +60,7 @@ export function NavigationButtons({
           }
         `}
       >
-        {isFinalStep ? "Publish Survey" : "Next Step"}
+        {isFinalStep ? finalButtonText : "Next Step"}
         {canProceed && (
           <span className="relative w-6 h-6 rounded-full bg-white flex items-center justify-center overflow-hidden">
             <ArrowRightIcon className="w-4 h-4 text-[#2663EB] absolute -translate-x-8 group-hover:translate-x-0 transition-transform duration-300" />

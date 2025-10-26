@@ -57,6 +57,19 @@ export interface SummaryGeneratedDetails {
 }
 
 /**
+ * Details for SURVEY_EDITED events
+ * 
+ * Sent when a survey is edited and a new version is created
+ */
+export interface SurveyEditedDetails {
+  survey_id: string;
+  survey_title: string;
+  version: number;
+  parent_id: string;
+  changelog: string;
+}
+
+/**
  * Discriminated union of all activity detail types
  * 
  * USAGE PATTERN:
@@ -77,7 +90,8 @@ export type ActivityDetails =
   | ResponseReceivedDetails
   | SurveyUpdatedDetails
   | SurveyDeletedDetails
-  | SummaryGeneratedDetails;
+  | SummaryGeneratedDetails
+  | SurveyEditedDetails;
 
 /**
  * Valid activity event types
@@ -90,7 +104,8 @@ export type ActivityEventType =
   | 'RESPONSE_RECEIVED'
   | 'SURVEY_UPDATED'
   | 'SURVEY_DELETED'
-  | 'SUMMARY_GENERATED';
+  | 'SUMMARY_GENERATED'
+  | 'SURVEY_EDITED';
 
 /**
  * Type guard to validate event type at runtime
@@ -103,7 +118,8 @@ export function isValidEventType(type: string): type is ActivityEventType {
     'RESPONSE_RECEIVED',
     'SURVEY_UPDATED',
     'SURVEY_DELETED',
-    'SUMMARY_GENERATED'
+    'SUMMARY_GENERATED',
+    'SURVEY_EDITED'
   ];
   return validTypes.includes(type);
 }

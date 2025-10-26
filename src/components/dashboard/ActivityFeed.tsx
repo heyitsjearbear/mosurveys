@@ -20,7 +20,8 @@ import type {
   ResponseReceivedDetails,
   SurveyUpdatedDetails,
   SurveyDeletedDetails,
-  SummaryGeneratedDetails
+  SummaryGeneratedDetails,
+  SurveyEditedDetails
 } from "@/types/activity";
 
 const logger = createLogger('ActivityFeed');
@@ -183,6 +184,13 @@ export default function ActivityFeed() {
           iconColor: "text-white",
           label: "AI Summary Generated",
         };
+      case "SURVEY_EDITED":
+        return {
+          icon: <PencilIcon className="w-5 h-5" />,
+          bgColor: "bg-purple-100",
+          iconColor: "text-purple-600",
+          label: "Survey Edited",
+        };
       default:
         return {
           icon: <BellIcon className="w-5 h-5" />,
@@ -243,6 +251,13 @@ export default function ActivityFeed() {
       case "SUMMARY_GENERATED": {
         const d = details as SummaryGeneratedDetails;
         return `AI summary generated for "${d.survey_title}"`;
+      }
+      case "SURVEY_EDITED": {
+        const d = details as SurveyEditedDetails;
+        const changelogText = d.changelog && d.changelog !== 'No changelog provided' 
+          ? `: ${d.changelog}` 
+          : '';
+        return `Survey "${d.survey_title}" updated to v${d.version}${changelogText}`;
       }
       default:
         return "Activity event";
