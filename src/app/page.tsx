@@ -7,6 +7,7 @@ import {
   CheckCircleIcon,
   ShareIcon,
 } from "@heroicons/react/24/outline";
+import InteractiveSteps from "@/components/InteractiveSteps";
 
 /**
  * MoSurveys Landing/Marketing Page
@@ -83,6 +84,34 @@ export default function Home() {
           </div>
         </section>
 
+        {/* How It Works Section - Interactive */}
+        <section className="py-12 lg:py-16 mb-12">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <h3 className="font-heading text-3xl font-semibold text-slate-900 tracking-tight mb-4">
+                How It Works
+              </h3>
+              <p className="font-body text-lg text-slate-600 leading-relaxed">
+                Four simple steps to start collecting feedback
+              </p>
+            </div>
+
+            <InteractiveSteps />
+
+            <div className="mt-12 text-center">
+              <Link
+                href="/mojeremiah"
+                className="group inline-flex items-center gap-3 px-8 py-4 border border-transparent font-accent text-lg font-medium rounded-full text-white bg-[#2663EB] hover:bg-[#2054C8] transition-all duration-200 hover:shadow-md active:scale-95 focus:ring-2 focus:ring-[#2663EB] focus:ring-offset-2"
+              >
+                <span className="relative w-7 h-7 rounded-full bg-white flex items-center justify-center overflow-hidden">
+                  <ArrowRightIcon className="w-5 h-5 text-[#2663EB] absolute -translate-x-8 group-hover:translate-x-0 transition-transform duration-300" />
+                </span>
+                Get Started Now
+              </Link>
+            </div>
+          </div>
+        </section>
+
         {/* Features Section */}
         <section className="py-12 lg:py-20">
           <div className="text-center mb-12">
@@ -102,7 +131,7 @@ export default function Home() {
               description="Build professional surveys in minutes with our intuitive drag-and-drop interface. No coding required."
             />
             <FeatureCard
-              icon={<ShareIcon className="w-8 h-8 text-green-500" />}
+              icon={<ShareIcon className="w-8 h-8 text-[#2663EB]" />}
               title="Easy Sharing"
               description="Share your surveys anywhere with simple links. Perfect for email, social media, and on-the-go feedback collection."
             />
@@ -112,12 +141,12 @@ export default function Home() {
               description="Track responses as they come in with live dashboards and detailed analytics to understand your data."
             />
             <FeatureCard
-              icon={<SparklesIcon className="w-8 h-8 text-amber-500" />}
+              icon={<SparklesIcon className="w-8 h-8 text-[#2663EB]" />}
               title="AI-Powered Insights"
               description="Get intelligent summaries and insights from your survey data powered by advanced AI technology."
             />
             <FeatureCard
-              icon={<CheckCircleIcon className="w-8 h-8 text-green-500" />}
+              icon={<CheckCircleIcon className="w-8 h-8 text-[#2663EB]" />}
               title="Multiple Question Types"
               description="Choose from text, multiple choice, ratings, and more to build the perfect survey for your needs."
             />
@@ -126,52 +155,6 @@ export default function Home() {
               title="Seamless Integration"
               description="Connect with your existing tools and workflows. Part of the MoFlo Cloud ecosystem."
             />
-          </div>
-        </section>
-
-        {/* How It Works Section */}
-        <section className="py-12 lg:py-16 bg-white rounded-lg shadow-sm border border-slate-200 mb-12">
-          <div className="max-w-5xl mx-auto px-8">
-            <div className="text-center mb-12">
-              <h3 className="font-heading text-3xl font-semibold text-slate-900 tracking-tight mb-4">
-                How It Works
-              </h3>
-              <p className="font-body text-lg text-slate-600 leading-relaxed">
-                Three simple steps to start collecting feedback
-              </p>
-            </div>
-
-            <div className="flex flex-col md:flex-row items-center justify-between space-y-8 md:space-y-0 md:space-x-8">
-              <ProcessStep
-                number={1}
-                title="Create"
-                description="Design your survey with custom questions and branding"
-              />
-              <ArrowRightIcon className="hidden md:block w-8 h-8 text-[#2663EB]" />
-              <ProcessStep
-                number={2}
-                title="Share"
-                description="Distribute via link or embed on your website"
-              />
-              <ArrowRightIcon className="hidden md:block w-8 h-8 text-[#2663EB]" />
-              <ProcessStep
-                number={3}
-                title="Analyze"
-                description="Review responses and gain insights from your data"
-              />
-            </div>
-
-            <div className="mt-12 text-center">
-              <Link
-                href="/mojeremiah"
-                className="group inline-flex items-center gap-3 px-8 py-4 border border-transparent font-accent text-lg font-medium rounded-full text-white bg-[#2663EB] hover:bg-[#2054C8] transition-all duration-200 hover:shadow-md active:scale-95 focus:ring-2 focus:ring-[#2663EB] focus:ring-offset-2"
-              >
-                <span className="relative w-7 h-7 rounded-full bg-white flex items-center justify-center overflow-hidden">
-                  <ArrowRightIcon className="w-5 h-5 text-[#2663EB] absolute -translate-x-8 group-hover:translate-x-0 transition-transform duration-300" />
-                </span>
-                Get Started Now
-              </Link>
-            </div>
           </div>
         </section>
       </main>
@@ -190,7 +173,7 @@ export default function Home() {
 
 /**
  * FeatureCard Component
- * Displays a feature with icon, title, and description
+ * Displays a feature with icon, title, and description (no hover effects, blue icons without background)
  */
 interface FeatureCardProps {
   icon: React.ReactNode;
@@ -200,11 +183,9 @@ interface FeatureCardProps {
 
 function FeatureCard({ icon, title, description }: FeatureCardProps) {
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6 transition-all duration-200 hover:shadow-md hover:scale-[1.02]">
+    <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
       <div className="mb-4">
-        <div className="inline-flex items-center justify-center w-16 h-16 bg-slate-50 rounded-lg">
-          {icon}
-        </div>
+        {icon}
       </div>
       <h4 className="font-heading text-lg font-semibold text-slate-900 mb-2">{title}</h4>
       <p className="font-body text-slate-600 leading-relaxed">{description}</p>
@@ -212,26 +193,3 @@ function FeatureCard({ icon, title, description }: FeatureCardProps) {
   );
 }
 
-/**
- * ProcessStep Component
- * Displays a step in the "How It Works" section
- */
-interface ProcessStepProps {
-  number: number;
-  title: string;
-  description: string;
-}
-
-function ProcessStep({ number, title, description }: ProcessStepProps) {
-  return (
-    <div className="flex-1 text-center">
-      <div className="flex flex-col items-center">
-        <div className="w-16 h-16 rounded-full bg-[#2663EB] text-white flex items-center justify-center font-accent font-semibold text-xl mb-4">
-          {number}
-        </div>
-        <h4 className="font-heading text-xl font-semibold text-slate-900 mb-2">{title}</h4>
-        <p className="font-body text-slate-600 leading-relaxed">{description}</p>
-      </div>
-    </div>
-  );
-}
