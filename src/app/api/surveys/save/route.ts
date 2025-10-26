@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import type { SurveyData } from '@/types/survey'
 import { surveyToDbInsert, questionToDbInsert } from '@/types/survey'
+import { createLogger } from '@/lib/logger'
+
+const logger = createLogger('SurveySave')
 
 // ─────────────────────────────────────────────
 // Survey Save API Route
@@ -50,7 +53,10 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (surveyError) {
-      console.error('Error creating survey:', surveyError)
+      logger.error('Failed to create survey in database', surveyError, {
+        surveyTitle: surveyData.title,
+        orgId
+      })
       return NextResponse.json(
         { 
           success: false, 
@@ -59,6 +65,11 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       )
     }
+
+    logger.info('Survey created successfully', { 
+      surveyId: survey.id, 
+      title: survey.title 
+    })
 
     // Step 2: Insert questions into survey_questions table
     const questionsToInsert = surveyData.questions.map((question, index) =>
@@ -70,7 +81,10 @@ export async function POST(request: NextRequest) {
       .insert(questionsToInsert)
 
     if (questionsError) {
-      console.error('Error creating questions:', questionsError)
+      logger.error('Failed to create survey questions', questionsError, {
+        surveyId: survey.id,
+        questionCount: questionsToInsert.length
+      })
       // Rollback: delete the survey if questions fail
       await supabaseAdmin.from('surveys').delete().eq('id', survey.id)
       
@@ -86,7 +100,6 @@ export async function POST(request: NextRequest) {
     // Step 3: Trigger webhook for activity feed
     try {
       const webhookUrl = `${request.nextUrl.origin}/api/webhook/sync`
-      console.log('📡 Calling webhook:', webhookUrl)
       
       const webhookPayload = {
         type: 'SURVEY_CREATED',
@@ -98,7 +111,11 @@ export async function POST(request: NextRequest) {
           audience: survey.audience
         }
       }
-      console.log('📦 Webhook payload:', webhookPayload)
+      
+      logger.debug('Calling webhook to log activity', { 
+        webhookUrl, 
+        eventType: 'SURVEY_CREATED' 
+      })
       
       const webhookResponse = await fetch(webhookUrl, {
         method: 'POST',
@@ -107,14 +124,21 @@ export async function POST(request: NextRequest) {
       })
       
       const webhookResult = await webhookResponse.json()
-      console.log('✅ Webhook response:', webhookResult)
       
       if (!webhookResponse.ok) {
-        console.error('⚠️ Webhook failed with status:', webhookResponse.status, webhookResult)
+        logger.warn('Webhook call failed', {
+          status: webhookResponse.status,
+          result: webhookResult
+        })
+      } else {
+        logger.debug('Webhook completed successfully', { result: webhookResult })
       }
     } catch (webhookError) {
       // Log but don't fail - survey was created successfully
-      console.error('❌ Webhook error (non-critical):', webhookError)
+      logger.warn('Webhook call failed (non-critical)', {
+        surveyId: survey.id,
+        error: webhookError instanceof Error ? webhookError.message : String(webhookError)
+      })
     }
 
     // Step 4: Return success with survey ID and shareable link
@@ -130,7 +154,7 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Survey save error:', error)
+    logger.error('Survey save error', error)
     return NextResponse.json(
       { 
         success: false, 

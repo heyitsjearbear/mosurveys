@@ -35,7 +35,7 @@ export interface Question {
 // UI Survey Data - used in the survey builder form
 export interface SurveyData {
   title: string;
-  description: string; // Not in DB yet - could be added or stored in ai_suggestions
+  description: string; // Saved to surveys.description column
   audience: string;
   questions: Question[];
 }
@@ -86,11 +86,9 @@ export function surveyToDbInsert(
   return {
     org_id: orgId,
     title: surveyData.title,
+    description: surveyData.description || null,
     audience: surveyData.audience,
-    // Store description in ai_suggestions or add new field to schema
-    ai_suggestions: surveyData.description 
-      ? { description: surveyData.description } 
-      : null,
+    ai_suggestions: null,
   };
 }
 

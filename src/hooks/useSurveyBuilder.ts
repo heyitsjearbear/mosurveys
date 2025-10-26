@@ -1,5 +1,8 @@
 import { useState } from "react";
 import type { SurveyData, Question, QuestionType } from "@/types/survey";
+import { createLogger } from "@/lib/logger";
+
+const logger = createLogger('SurveyBuilder');
 
 // ─────────────────────────────────────────────
 // Survey Builder Hook
@@ -112,7 +115,10 @@ export function useSurveyBuilder() {
         throw new Error(data.error || 'Failed to generate questions');
       }
     } catch (error) {
-      console.error('AI generation error:', error);
+      logger.error('AI question generation failed', error, {
+        title: surveyData.title,
+        audience: surveyData.audience
+      });
       setPublishError('Failed to generate questions. Please try again.');
       setShowAIPreview(false);
     } finally {
@@ -156,13 +162,17 @@ export function useSurveyBuilder() {
       const data = await response.json();
 
       if (data.success) {
+        logger.info('Survey published successfully', { surveyId: data.survey.id });
         return { success: true, surveyId: data.survey.id };
       } else {
         setPublishError(data.error || 'Failed to publish survey');
         return { success: false, error: data.error };
       }
     } catch (error) {
-      console.error('Publish error:', error);
+      logger.error('Failed to publish survey', error, {
+        title: surveyData.title,
+        questionCount: surveyData.questions.length
+      });
       const errorMessage = 'Failed to publish survey. Please try again.';
       setPublishError(errorMessage);
       return { success: false, error: errorMessage };

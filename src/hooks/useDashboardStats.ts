@@ -1,5 +1,8 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabaseClient";
+import { createLogger } from "@/lib/logger";
+
+const logger = createLogger('DashboardStats');
 
 /**
  * Dashboard Statistics Interface
@@ -126,8 +129,14 @@ export function useDashboardStats() {
         activeSurveys: activeSurveys ?? 0,
         totalResponses: totalResponses ?? 0,
       });
+      
+      logger.debug('Dashboard stats fetched', {
+        totalSurveys: totalSurveys ?? 0,
+        activeSurveys: activeSurveys ?? 0,
+        totalResponses: totalResponses ?? 0
+      });
     } catch (err) {
-      console.error("Error fetching dashboard stats:", err);
+      logger.error('Failed to fetch dashboard stats', err);
       setError(err instanceof Error ? err.message : "Failed to fetch stats");
     } finally {
       setLoading(false);

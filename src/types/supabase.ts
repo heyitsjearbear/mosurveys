@@ -154,6 +154,7 @@ export type Database = {
           audience: string | null
           changelog: string | null
           created_at: string
+          description: string | null
           id: string
           org_id: string
           parent_id: string | null
@@ -167,6 +168,7 @@ export type Database = {
           audience?: string | null
           changelog?: string | null
           created_at?: string
+          description?: string | null
           id?: string
           org_id: string
           parent_id?: string | null
@@ -180,6 +182,7 @@ export type Database = {
           audience?: string | null
           changelog?: string | null
           created_at?: string
+          description?: string | null
           id?: string
           org_id?: string
           parent_id?: string | null

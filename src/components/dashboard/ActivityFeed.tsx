@@ -12,6 +12,7 @@ import {
   ArrowRightIcon,
 } from "@heroicons/react/24/outline";
 import { supabase } from "@/lib/supabaseClient";
+import { createLogger } from "@/lib/logger";
 import type { Database } from "@/types/supabase";
 import type { 
   ActivityDetails, 
@@ -21,6 +22,8 @@ import type {
   SurveyDeletedDetails,
   SummaryGeneratedDetails
 } from "@/types/activity";
+
+const logger = createLogger('ActivityFeed');
 
 type ActivityFeedRow = Database["public"]["Tables"]["activity_feed"]["Row"];
 
@@ -54,7 +57,7 @@ export default function ActivityFeed() {
     
     fetchActivities();
 
-    console.log('🔌 Setting up Realtime subscription...');
+    logger.debug('Setting up Realtime subscription for activity feed');
     
     // Subscribe to real-time updates
     const channel = supabase.channel("activity_feed_changes");
@@ -69,7 +72,7 @@ export default function ActivityFeed() {
           filter: `org_id=eq.${DEFAULT_ORG_ID}`,
         },
         (payload) => {
-          console.log("🔔 Activity feed update received:", payload);
+          logger.debug('Activity feed update received', { event: payload.eventType });
           // Refresh activities when there's a change (only if still mounted)
           if (isMountedRef.current) {
             fetchActivities();
@@ -80,24 +83,24 @@ export default function ActivityFeed() {
         // Only update state if component is still mounted
         if (!isMountedRef.current) return;
         
-        console.log('📡 Realtime subscription status:', status, err);
+        logger.debug('Realtime subscription status changed', { status });
         
         if (status === 'SUBSCRIBED') {
-          console.log('✅ Realtime connected successfully!');
+          logger.info('Realtime connection established');
           setRealtimeStatus('connected');
         } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
-          console.error('❌ Realtime connection error:', status, err);
+          logger.error('Realtime connection failed', err, { status });
           setRealtimeStatus('error');
         }
         // Note: 'CLOSED' status is expected during cleanup, so we ignore it
         else if (status === 'CLOSED') {
-          console.log('🔌 Realtime connection closed (expected during cleanup)');
+          logger.debug('Realtime connection closed (cleanup)');
         }
       });
 
     // Cleanup subscription on unmount
     return () => {
-      console.log('🔌 Cleaning up Realtime subscription...');
+      logger.debug('Cleaning up Realtime subscription');
       isMountedRef.current = false; // Mark as unmounted BEFORE unsubscribe
       supabase.removeChannel(channel);
     };
@@ -122,14 +125,14 @@ export default function ActivityFeed() {
         throw fetchError;
       }
 
-      console.log("Fetched activities:", data);
+      logger.debug('Activities fetched successfully', { count: data?.length || 0 });
       
       // Only update state if component is still mounted
       if (isMountedRef.current) {
         setActivities(data || []);
       }
     } catch (err) {
-      console.error("Error fetching activities:", err);
+      logger.error('Failed to fetch activities', err);
       // Only update state if component is still mounted
       if (isMountedRef.current) {
         setError("Failed to load activity feed. Please try again.");

@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import type { ActivityEventType, ActivityDetails } from '@/types/activity'
 import { isValidEventType } from '@/types/activity'
+import { createLogger } from '@/lib/logger'
+
+const logger = createLogger('WebhookSync')
 
 // ─────────────────────────────────────────────
 // Webhook Sync API Route
@@ -27,15 +30,18 @@ const VALID_EVENT_TYPES: readonly ActivityEventType[] = [
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('🎯 Webhook received')
+    logger.info('Webhook received')
     
     // Parse request body
     const payload: WebhookPayload = await request.json()
-    console.log('📨 Webhook payload:', payload)
+    logger.debug('Webhook payload received', payload)
 
     // Validate required fields
     if (!payload.type || !payload.org_id) {
-      console.error('❌ Missing required fields:', { type: payload.type, org_id: payload.org_id })
+      logger.warn('Missing required fields in webhook payload', { 
+        type: payload.type, 
+        org_id: payload.org_id 
+      })
       return NextResponse.json(
         { 
           success: false, 
@@ -47,7 +53,10 @@ export async function POST(request: NextRequest) {
 
     // Validate event type using type guard
     if (!isValidEventType(payload.type)) {
-      console.error('❌ Invalid event type:', payload.type)
+      logger.warn('Invalid event type received', { 
+        receivedType: payload.type,
+        validTypes: VALID_EVENT_TYPES 
+      })
       return NextResponse.json(
         { 
           success: false, 
@@ -58,7 +67,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Insert into activity_feed table
-    console.log('💾 Inserting into activity_feed...')
+    logger.debug('Inserting activity into database', { type: payload.type })
     const { data, error } = await supabaseAdmin
       .from('activity_feed')
       .insert({
@@ -70,7 +79,10 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error('❌ Error inserting activity:', error)
+      logger.error('Failed to insert activity into database', error, {
+        org_id: payload.org_id,
+        type: payload.type
+      })
       return NextResponse.json(
         { 
           success: false, 
@@ -81,7 +93,11 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log('✅ Activity logged successfully:', data)
+    logger.info('Activity logged successfully', { 
+      activityId: data.id,
+      type: data.type,
+      org_id: data.org_id
+    })
 
     // Return success response
     return NextResponse.json({
@@ -90,7 +106,7 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('❌ Webhook sync error:', error)
+    logger.error('Webhook sync error', error)
     return NextResponse.json(
       { 
         success: false, 

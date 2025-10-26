@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import type { Question, QuestionType } from '@/types/survey'
+import { createLogger } from '@/lib/logger'
+
+const logger = createLogger('OpenAIGenerate')
 
 // ─────────────────────────────────────────────
 // OpenAI Question Generation API Route
@@ -21,7 +24,11 @@ interface OpenAIQuestion {
 
 export async function POST(request: NextRequest) {
   try {
+    logger.info('AI question generation requested')
+    
     const { title, description, audience }: GenerateRequest = await request.json()
+
+    logger.debug('Request data received', { title, description, audience })
 
     // Validate inputs
     if (!title || !audience) {
@@ -38,8 +45,14 @@ export async function POST(request: NextRequest) {
 
     // If no API key, return mock questions
     if (!apiKey) {
-      console.log('OpenAI API key not found, returning mock questions')
       const mockQuestions = generateMockQuestions(title, audience)
+      
+      logger.info('OpenAI API key not configured, using mock questions', {
+        title,
+        audience,
+        questionCount: mockQuestions.length
+      })
+      
       return NextResponse.json({
         success: true,
         questions: mockQuestions,
@@ -94,6 +107,13 @@ export async function POST(request: NextRequest) {
         required: true
       }))
 
+      logger.info('OpenAI successfully generated questions', {
+        title,
+        audience,
+        questionCount: formattedQuestions.length,
+        model: 'gpt-4o-mini'
+      })
+
       return NextResponse.json({
         success: true,
         questions: formattedQuestions,
@@ -101,9 +121,16 @@ export async function POST(request: NextRequest) {
       })
 
     } catch (openaiError) {
-      console.error('OpenAI API error:', openaiError)
       // Fall back to mock questions on error
       const mockQuestions = generateMockQuestions(title, audience)
+      
+      logger.warn('OpenAI API error, falling back to mock questions', {
+        title,
+        audience,
+        questionCount: mockQuestions.length,
+        error: openaiError instanceof Error ? openaiError.message : String(openaiError)
+      })
+      
       return NextResponse.json({
         success: true,
         questions: mockQuestions,
@@ -113,7 +140,7 @@ export async function POST(request: NextRequest) {
     }
 
   } catch (error) {
-    console.error('Generate questions error:', error)
+    logger.error('Failed to generate questions', error)
     return NextResponse.json(
       { 
         success: false, 

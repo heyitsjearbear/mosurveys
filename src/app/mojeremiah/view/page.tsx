@@ -8,10 +8,13 @@ import {
   ArrowRightIcon,
 } from "@heroicons/react/24/outline";
 import { supabase } from "@/lib/supabaseClient";
+import { createLogger } from "@/lib/logger";
 import type { Database } from "@/types/supabase";
 import { LoadingState, ErrorState, EmptyState, Toast, ConfirmModal } from "@/components/common";
 import { SurveyCard } from "@/components/survey/manage";
 import type { ToastType } from "@/components/common/Toast";
+
+const logger = createLogger('SurveyView');
 
 type Survey = Database["public"]["Tables"]["surveys"]["Row"];
 
@@ -79,8 +82,9 @@ export default function SurveyViewPage() {
       }
 
       setSurveys(data || []);
+      logger.debug('Surveys fetched successfully', { count: data?.length || 0 });
     } catch (err) {
-      console.error("Error fetching surveys:", err);
+      logger.error('Failed to fetch surveys', err);
       setError("Failed to load surveys. Please try again.");
     } finally {
       setLoading(false);
@@ -157,25 +161,29 @@ export default function SurveyViewPage() {
         .eq("id", surveyIdToDelete);
 
       if (deleteError) {
-        console.error("❌ Supabase delete error:", deleteError);
+        logger.error('Supabase delete failed', deleteError, { surveyId: surveyIdToDelete });
         throw new Error(`Database error: ${deleteError.message} (Code: ${deleteError.code})`);
       }
 
       // OPTIMISTIC UPDATE: Step 4 - Success! Keep the optimistic update
       showToast("Survey deleted successfully", "success");
       
-      console.log(`✅ Survey deleted successfully: "${surveyTitle}" (${surveyIdToDelete})`);
-      console.log(`📊 Surveys remaining: ${surveys.length - 1}`);
+      logger.info('Survey deleted successfully', { 
+        surveyId: surveyIdToDelete, 
+        surveyTitle,
+        remainingSurveys: surveys.length - 1
+      });
       
       // Note: Dashboard stats will auto-update via Realtime subscription
       // Activity feed entry was created via database trigger
     } catch (err) {
       // OPTIMISTIC UPDATE: Step 5 - Failure! Rollback to previous state
-      console.error("❌ Error deleting survey:", err);
-      
-      // Show detailed error in development
       const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
-      console.error("Error details:", errorMessage);
+      
+      logger.error('Failed to delete survey', err, { 
+        surveyId: surveyIdToDelete,
+        surveyTitle 
+      });
       
       setSurveys(previousSurveys);
       showToast(`Failed to delete survey: ${errorMessage}`, "error");
