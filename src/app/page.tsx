@@ -1,65 +1,237 @@
-import Image from "next/image";
+import Link from "next/link";
+import {
+  ClipboardDocumentListIcon,
+  ChartBarIcon,
+  SparklesIcon,
+  ArrowRightIcon,
+  CheckCircleIcon,
+  ShareIcon,
+} from "@heroicons/react/24/outline";
+
+/**
+ * MoSurveys Landing/Marketing Page
+ * 
+ * This is the public-facing landing page for MoSurveys.
+ * Features:
+ * - Hero section with value proposition
+ * - Feature highlights with icons
+ * - Call-to-action to get started
+ * - Modern, clean design matching the dashboard aesthetic
+ */
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <div className="min-h-screen bg-slate-50">
+      {/* Navigation Header */}
+      <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            {/* Logo/Brand */}
+            <div className="flex items-center">
+              <h1 className="font-heading text-2xl font-semibold text-[#2663EB]">MoSurveys</h1>
+              <span className="ml-2 font-body text-sm text-slate-500">by MoFlo</span>
+            </div>
+
+            {/* CTA Button */}
+            <div>
+              <Link
+                href="/mojeremiah"
+                className="group inline-flex items-center gap-3 px-4 py-2 border border-transparent font-accent text-sm font-medium rounded-full text-white bg-[#2663EB] hover:bg-[#2054C8] transition-all duration-200 hover:shadow-md active:scale-95 focus:ring-2 focus:ring-[#2663EB] focus:ring-offset-2"
+              >
+                <span className="relative w-5 h-5 rounded-full bg-white flex items-center justify-center overflow-hidden">
+                  <ArrowRightIcon className="w-3 h-3 text-[#2663EB] absolute -translate-x-8 group-hover:translate-x-0 transition-transform duration-300" />
+                </span>
+                Get Started
+              </Link>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Hero Section */}
+        <section className="py-16 lg:py-20 text-center">
+          <div className="max-w-3xl mx-auto">
+            <h2 className="font-heading text-4xl md:text-5xl font-semibold text-slate-900 tracking-tight mb-6">
+              Create Surveys That Get Results
+            </h2>
+            <p className="font-body text-lg md:text-xl text-slate-600 leading-relaxed mb-8">
+              Build, share, and analyze surveys with ease. Collect valuable feedback 
+              from your audience with our intuitive survey platform.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link
+                href="/mojeremiah"
+                className="group inline-flex items-center justify-center gap-3 px-6 py-3 border border-transparent font-accent text-base font-medium rounded-full text-white bg-[#2663EB] hover:bg-[#2054C8] transition-all duration-200 hover:shadow-md active:scale-95 focus:ring-2 focus:ring-[#2663EB] focus:ring-offset-2"
+              >
+                <span className="relative w-6 h-6 rounded-full bg-white flex items-center justify-center overflow-hidden">
+                  <ArrowRightIcon className="w-4 h-4 text-[#2663EB] absolute -translate-x-8 group-hover:translate-x-0 transition-transform duration-300" />
+                </span>
+                Start Creating
+              </Link>
+              <Link
+                href="/mojeremiah"
+                className="group inline-flex items-center justify-center gap-3 px-6 py-3 border border-slate-300 font-accent text-base font-medium rounded-full text-slate-700 bg-slate-50 hover:bg-slate-100 hover:border-slate-400 transition-all duration-200 active:scale-95 focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
+              >
+                <span className="relative w-6 h-6 rounded-full bg-[#2663EB] flex items-center justify-center overflow-hidden">
+                  <ArrowRightIcon className="w-4 h-4 text-white absolute -translate-x-8 group-hover:translate-x-0 transition-transform duration-300" />
+                </span>
+                View Dashboard
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* Features Section */}
+        <section className="py-12 lg:py-20">
+          <div className="text-center mb-12">
+            <h3 className="font-heading text-3xl font-semibold text-slate-900 tracking-tight mb-4">
+              Everything You Need to Succeed
+            </h3>
+            <p className="font-body text-lg text-slate-600 leading-relaxed">
+              Powerful features to help you create, share, and analyze surveys
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Feature Cards */}
+            <FeatureCard
+              icon={<ClipboardDocumentListIcon className="w-8 h-8 text-[#2663EB]" />}
+              title="Easy Survey Creation"
+              description="Build professional surveys in minutes with our intuitive drag-and-drop interface. No coding required."
+            />
+            <FeatureCard
+              icon={<ShareIcon className="w-8 h-8 text-green-500" />}
+              title="Easy Sharing"
+              description="Share your surveys anywhere with simple links. Perfect for email, social media, and on-the-go feedback collection."
+            />
+            <FeatureCard
+              icon={<ChartBarIcon className="w-8 h-8 text-[#2663EB]" />}
+              title="Real-time Analytics"
+              description="Track responses as they come in with live dashboards and detailed analytics to understand your data."
+            />
+            <FeatureCard
+              icon={<SparklesIcon className="w-8 h-8 text-amber-500" />}
+              title="AI-Powered Insights"
+              description="Get intelligent summaries and insights from your survey data powered by advanced AI technology."
+            />
+            <FeatureCard
+              icon={<CheckCircleIcon className="w-8 h-8 text-green-500" />}
+              title="Multiple Question Types"
+              description="Choose from text, multiple choice, ratings, and more to build the perfect survey for your needs."
+            />
+            <FeatureCard
+              icon={<ArrowRightIcon className="w-8 h-8 text-[#2663EB]" />}
+              title="Seamless Integration"
+              description="Connect with your existing tools and workflows. Part of the MoFlo Cloud ecosystem."
+            />
+          </div>
+        </section>
+
+        {/* How It Works Section */}
+        <section className="py-12 lg:py-16 bg-white rounded-lg shadow-sm border border-slate-200 mb-12">
+          <div className="max-w-5xl mx-auto px-8">
+            <div className="text-center mb-12">
+              <h3 className="font-heading text-3xl font-semibold text-slate-900 tracking-tight mb-4">
+                How It Works
+              </h3>
+              <p className="font-body text-lg text-slate-600 leading-relaxed">
+                Three simple steps to start collecting feedback
+              </p>
+            </div>
+
+            <div className="flex flex-col md:flex-row items-center justify-between space-y-8 md:space-y-0 md:space-x-8">
+              <ProcessStep
+                number={1}
+                title="Create"
+                description="Design your survey with custom questions and branding"
+              />
+              <ArrowRightIcon className="hidden md:block w-8 h-8 text-[#2663EB]" />
+              <ProcessStep
+                number={2}
+                title="Share"
+                description="Distribute via link or embed on your website"
+              />
+              <ArrowRightIcon className="hidden md:block w-8 h-8 text-[#2663EB]" />
+              <ProcessStep
+                number={3}
+                title="Analyze"
+                description="Review responses and gain insights from your data"
+              />
+            </div>
+
+            <div className="mt-12 text-center">
+              <Link
+                href="/mojeremiah"
+                className="group inline-flex items-center gap-3 px-8 py-4 border border-transparent font-accent text-lg font-medium rounded-full text-white bg-[#2663EB] hover:bg-[#2054C8] transition-all duration-200 hover:shadow-md active:scale-95 focus:ring-2 focus:ring-[#2663EB] focus:ring-offset-2"
+              >
+                <span className="relative w-7 h-7 rounded-full bg-white flex items-center justify-center overflow-hidden">
+                  <ArrowRightIcon className="w-5 h-5 text-[#2663EB] absolute -translate-x-8 group-hover:translate-x-0 transition-transform duration-300" />
+                </span>
+                Get Started Now
+              </Link>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      {/* Footer */}
+      <footer className="bg-white border-t border-slate-200 mt-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <p className="text-center font-body text-sm text-slate-500">
+            © 2025 MoSurveys by MoFlo Cloud. All rights reserved.
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </footer>
+    </div>
+  );
+}
+
+/**
+ * FeatureCard Component
+ * Displays a feature with icon, title, and description
+ */
+interface FeatureCardProps {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+}
+
+function FeatureCard({ icon, title, description }: FeatureCardProps) {
+  return (
+    <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6 transition-all duration-200 hover:shadow-md hover:scale-[1.02]">
+      <div className="mb-4">
+        <div className="inline-flex items-center justify-center w-16 h-16 bg-slate-50 rounded-lg">
+          {icon}
         </div>
-      </main>
+      </div>
+      <h4 className="font-heading text-lg font-semibold text-slate-900 mb-2">{title}</h4>
+      <p className="font-body text-slate-600 leading-relaxed">{description}</p>
+    </div>
+  );
+}
+
+/**
+ * ProcessStep Component
+ * Displays a step in the "How It Works" section
+ */
+interface ProcessStepProps {
+  number: number;
+  title: string;
+  description: string;
+}
+
+function ProcessStep({ number, title, description }: ProcessStepProps) {
+  return (
+    <div className="flex-1 text-center">
+      <div className="flex flex-col items-center">
+        <div className="w-16 h-16 rounded-full bg-[#2663EB] text-white flex items-center justify-center font-accent font-semibold text-xl mb-4">
+          {number}
+        </div>
+        <h4 className="font-heading text-xl font-semibold text-slate-900 mb-2">{title}</h4>
+        <p className="font-body text-slate-600 leading-relaxed">{description}</p>
+      </div>
     </div>
   );
 }
