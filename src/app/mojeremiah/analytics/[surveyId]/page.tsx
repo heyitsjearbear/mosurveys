@@ -28,6 +28,9 @@ type Survey = Database["public"]["Tables"]["surveys"]["Row"];
 type SurveyQuestion = Database["public"]["Tables"]["survey_questions"]["Row"];
 type Response = Database["public"]["Tables"]["responses"]["Row"];
 
+// Minimal type for version selector (only fetch what we need)
+type SurveyVersion = Pick<Survey, 'id' | 'version'>;
+
 // Get default org ID from environment or use fallback
 const DEFAULT_ORG_ID = process.env.NEXT_PUBLIC_DEFAULT_ORG_ID || '00000000-0000-0000-0000-000000000001';
 
@@ -44,7 +47,7 @@ export default function AnalyticsPage() {
   const [error, setError] = useState<string | null>(null);
   
   // Version selection state
-  const [allVersions, setAllVersions] = useState<Survey[]>([]);
+  const [allVersions, setAllVersions] = useState<SurveyVersion[]>([]);
   const [selectedVersionId, setSelectedVersionId] = useState<string>(surveyId);
 
   // Realtime state
@@ -74,9 +77,9 @@ export default function AnalyticsPage() {
       if (allVersions.length === 0) {
         const { data: versionsData } = await supabase
           .from("surveys")
-          .select("id, title, version, created_at")
+          .select("id, version")
           .eq("org_id", DEFAULT_ORG_ID)
-          .ilike("title", surveyData.title) // Get surveys with same title
+          .ilike("title", surveyData.title)
           .order("version", { ascending: true });
 
         if (versionsData) {
@@ -126,11 +129,11 @@ export default function AnalyticsPage() {
     }
   }, [selectedVersionId, fetchAnalyticsData]);
 
-  // Realtime subscription for new responses
+  // Live updates for new responses
   useEffect(() => {
     if (!selectedVersionId) return;
 
-    logger.info('Setting up Realtime subscription', { surveyId: selectedVersionId });
+    logger.info('Setting up live updates', { surveyId: selectedVersionId });
 
     const channel: RealtimeChannel = supabase
       .channel(`analytics-${selectedVersionId}`)
@@ -143,22 +146,29 @@ export default function AnalyticsPage() {
           filter: `survey_id=eq.${selectedVersionId}`,
         },
         (payload) => {
-          logger.info('New response detected via Realtime', {
+          logger.info('New response detected', {
             responseId: payload.new.id,
             surveyId: selectedVersionId,
           });
 
           setNewResponseCount((prev) => prev + 1);
           setHasNewResponses(true);
+
+          // Auto-refresh after 5 seconds to fetch AI sentiment
+          logger.info('Scheduling auto-refresh in 5 seconds...');
+          setTimeout(() => {
+            logger.info('Auto-refreshing analytics data');
+            fetchAnalyticsData();
+          }, 5000);
         }
       )
       .subscribe();
 
     return () => {
-      logger.debug('Cleaning up Realtime subscription', { surveyId: selectedVersionId });
+      logger.debug('Cleaning up subscription', { surveyId: selectedVersionId });
       supabase.removeChannel(channel);
     };
-  }, [selectedVersionId]);
+  }, [selectedVersionId, fetchAnalyticsData]);
 
   // Manual refresh handler
   const handleRefresh = async () => {

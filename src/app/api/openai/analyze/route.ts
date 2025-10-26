@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabaseClient';
+import { supabaseAdmin } from '@/lib/supabaseAdmin'; // Use admin client for server-side operations
 import { createLogger } from '@/lib/logger';
 
 const logger = createLogger('OpenAIAnalyze');
@@ -95,7 +95,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Update the response in database with sentiment and summary
-    const { error: updateError } = await supabase
+    // Using admin client to bypass RLS
+    const { error: updateError } = await supabaseAdmin
       .from('responses')
       .update({
         sentiment: analysis.sentiment,

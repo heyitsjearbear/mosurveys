@@ -12,7 +12,8 @@
     "db:migration": "supabase migration new",
     "db:status": "supabase status",
     "db:studio": "supabase db remote open",
-    "db:seed": "tsx scripts/seed-test-data.ts"
+    "db:seed": "tsx scripts/seed-test-data.ts",
+    "db:reanalyze": "tsx scripts/reanalyze-responses.ts"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
