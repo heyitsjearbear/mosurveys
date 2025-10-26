@@ -111,6 +111,7 @@ export type Database = {
           options: string[] | null
           position: number
           question: string
+          required: boolean
           survey_id: string
           type: string
           updated_at: string
@@ -121,6 +122,7 @@ export type Database = {
           options?: string[] | null
           position: number
           question: string
+          required?: boolean
           survey_id: string
           type?: string
           updated_at?: string
@@ -131,6 +133,7 @@ export type Database = {
           options?: string[] | null
           position?: number
           question?: string
+          required?: boolean
           survey_id?: string
           type?: string
           updated_at?: string

@@ -28,7 +28,7 @@ export interface Question {
   type: QuestionType;
   text: string; // Maps to DB 'question' field
   options?: string[]; // For multiple choice
-  required: boolean; // TODO: Add to DB schema if needed
+  required: boolean; // Whether this question must be answered
   position?: number; // Maps to DB 'position' field
 }
 
@@ -58,6 +58,7 @@ export function questionToDbInsert(
     type: question.type,
     options: question.options || null,
     position,
+    required: question.required,
   };
 }
 
@@ -70,7 +71,7 @@ export function dbQuestionToUi(dbQuestion: DbQuestion): Question {
     type: dbQuestion.type as QuestionType,
     text: dbQuestion.question,
     options: dbQuestion.options || undefined,
-    required: true, // Default to true until we add this field to DB
+    required: dbQuestion.required,
     position: dbQuestion.position,
   };
 }
