@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import {
   ClipboardDocumentListIcon,
@@ -24,15 +24,26 @@ const DEFAULT_ORG_ID = process.env.NEXT_PUBLIC_DEFAULT_ORG_ID || '00000000-0000-
  * 
  * Displays real-time activity feed with Supabase Realtime subscriptions.
  * Shows survey creation, responses, updates, deletions, and AI summary generation events.
+ * 
+ * Features:
+ * - Realtime updates via Supabase subscriptions
+ * - Proper cleanup to prevent memory leaks
+ * - Safe state updates (checks if component is mounted)
  */
 export default function ActivityFeed() {
   const [activities, setActivities] = useState<ActivityFeedRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [realtimeStatus, setRealtimeStatus] = useState<'connecting' | 'connected' | 'error'>('connecting');
+  
+  // Track if component is mounted to prevent state updates after unmount
+  const isMountedRef = useRef(true);
 
   // Fetch activities on mount and subscribe to real-time updates
   useEffect(() => {
+    // Mark component as mounted
+    isMountedRef.current = true;
+    
     fetchActivities();
 
     console.log('🔌 Setting up Realtime subscription...');
@@ -51,31 +62,44 @@ export default function ActivityFeed() {
         },
         (payload) => {
           console.log("🔔 Activity feed update received:", payload);
-          // Refresh activities when there's a change
-          fetchActivities();
+          // Refresh activities when there's a change (only if still mounted)
+          if (isMountedRef.current) {
+            fetchActivities();
+          }
         }
       )
       .subscribe((status, err) => {
+        // Only update state if component is still mounted
+        if (!isMountedRef.current) return;
+        
         console.log('📡 Realtime subscription status:', status, err);
         
         if (status === 'SUBSCRIBED') {
           console.log('✅ Realtime connected successfully!');
           setRealtimeStatus('connected');
-        } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
+        } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
           console.error('❌ Realtime connection error:', status, err);
           setRealtimeStatus('error');
+        }
+        // Note: 'CLOSED' status is expected during cleanup, so we ignore it
+        else if (status === 'CLOSED') {
+          console.log('🔌 Realtime connection closed (expected during cleanup)');
         }
       });
 
     // Cleanup subscription on unmount
     return () => {
       console.log('🔌 Cleaning up Realtime subscription...');
-      channel.unsubscribe();
+      isMountedRef.current = false; // Mark as unmounted BEFORE unsubscribe
+      supabase.removeChannel(channel);
     };
   }, []);
 
   const fetchActivities = async () => {
     try {
+      // Only update state if component is still mounted
+      if (!isMountedRef.current) return;
+      
       setLoading(true);
       setError(null);
 
@@ -91,12 +115,22 @@ export default function ActivityFeed() {
       }
 
       console.log("Fetched activities:", data);
-      setActivities(data || []);
+      
+      // Only update state if component is still mounted
+      if (isMountedRef.current) {
+        setActivities(data || []);
+      }
     } catch (err) {
       console.error("Error fetching activities:", err);
-      setError("Failed to load activity feed. Please try again.");
+      // Only update state if component is still mounted
+      if (isMountedRef.current) {
+        setError("Failed to load activity feed. Please try again.");
+      }
     } finally {
-      setLoading(false);
+      // Only update state if component is still mounted
+      if (isMountedRef.current) {
+        setLoading(false);
+      }
     }
   };
 

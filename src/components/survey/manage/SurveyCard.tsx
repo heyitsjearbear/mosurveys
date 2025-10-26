@@ -13,16 +13,23 @@ type Survey = Database["public"]["Tables"]["surveys"]["Row"];
  * 
  * Displays a single survey with actions (copy link, analytics, delete)
  * Used in the survey management/view page
+ * 
+ * Features:
+ * - Copy shareable survey link
+ * - Navigate to analytics dashboard
+ * - Delete survey with loading state
  */
 
 interface SurveyCardProps {
   survey: Survey;
   copiedId: string | null;
+  deletingId: string | null;
   onCopyLink: (surveyId: string) => void;
   onDelete: (surveyId: string) => void;
 }
 
-export default function SurveyCard({ survey, copiedId, onCopyLink, onDelete }: SurveyCardProps) {
+export default function SurveyCard({ survey, copiedId, deletingId, onCopyLink, onDelete }: SurveyCardProps) {
+  const isDeleting = deletingId === survey.id;
   return (
     <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6 transition-all duration-200 hover:shadow-md hover:scale-[1.02]">
       {/* Survey Header */}
@@ -67,11 +74,21 @@ export default function SurveyCard({ survey, copiedId, onCopyLink, onDelete }: S
 
         <button
           onClick={() => onDelete(survey.id)}
-          className="inline-flex items-center gap-1 px-3 py-1.5 bg-red-100 text-red-700 hover:bg-red-200 font-accent text-xs font-medium rounded-lg transition-colors duration-200"
+          disabled={isDeleting}
+          className="inline-flex items-center gap-1 px-3 py-1.5 bg-red-100 text-red-700 hover:bg-red-200 font-accent text-xs font-medium rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-red-100"
           title="Delete survey"
         >
-          <TrashIcon className="w-3.5 h-3.5" />
-          Delete
+          {isDeleting ? (
+            <>
+              <div className="w-3.5 h-3.5 border-2 border-red-700/30 border-t-red-700 rounded-full animate-spin" />
+              Deleting...
+            </>
+          ) : (
+            <>
+              <TrashIcon className="w-3.5 h-3.5" />
+              Delete
+            </>
+          )}
         </button>
       </div>
     </div>

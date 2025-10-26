@@ -9,8 +9,9 @@ import {
 } from "@heroicons/react/24/outline";
 import { supabase } from "@/lib/supabaseClient";
 import type { Database } from "@/types/supabase";
-import { LoadingState, ErrorState, EmptyState } from "@/components/common";
+import { LoadingState, ErrorState, EmptyState, Toast, ConfirmModal } from "@/components/common";
 import { SurveyCard } from "@/components/survey/manage";
+import type { ToastType } from "@/components/common/Toast";
 
 type Survey = Database["public"]["Tables"]["surveys"]["Row"];
 
@@ -18,15 +19,44 @@ type Survey = Database["public"]["Tables"]["surveys"]["Row"];
 // Survey Management Page
 // ─────────────────────────────────────────────
 // Displays all surveys with filtering, sorting, and management actions
+//
+// Features:
+// - Optimistic updates for instant UI feedback
+// - Custom confirmation modal for deletions
+// - Toast notifications for success/error states
+// - Cascade deletion (surveys, questions, responses)
+// - Loading states during operations
 
 // Get default org ID from environment or use fallback
 const DEFAULT_ORG_ID = process.env.NEXT_PUBLIC_DEFAULT_ORG_ID || '00000000-0000-0000-0000-000000000001';
 
+interface ToastState {
+  message: string;
+  type: ToastType;
+  show: boolean;
+}
+
 export default function SurveyViewPage() {
+  // Survey data state
   const [surveys, setSurveys] = useState<Survey[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // UI state
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [toast, setToast] = useState<ToastState>({ message: "", type: "success", show: false });
+  
+  // Confirmation modal state
+  const [confirmModal, setConfirmModal] = useState<{
+    show: boolean;
+    surveyId: string | null;
+    surveyTitle: string;
+  }>({
+    show: false,
+    surveyId: null,
+    surveyTitle: "",
+  });
 
   // Fetch surveys on mount
   useEffect(() => {
@@ -57,34 +87,119 @@ export default function SurveyViewPage() {
     }
   };
 
+  // ─────────────────────────────────────────────
+  // COPY LINK HANDLER
+  // ─────────────────────────────────────────────
   const handleCopyLink = (surveyId: string) => {
     const link = `${window.location.origin}/mojeremiah/respond/${surveyId}`;
     navigator.clipboard.writeText(link);
     setCopiedId(surveyId);
+    
+    // Show success toast
+    showToast("Link copied to clipboard!", "success");
+    
+    // Reset copied state after 2 seconds
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  const handleDelete = async (surveyId: string) => {
-    if (!confirm("Are you sure you want to delete this survey?")) {
-      return;
-    }
+  // ─────────────────────────────────────────────
+  // DELETE HANDLERS - WITH OPTIMISTIC UPDATES
+  // ─────────────────────────────────────────────
+  
+  /**
+   * Step 1: Open confirmation modal
+   * Shows custom modal instead of browser confirm()
+   */
+  const handleDeleteClick = (surveyId: string) => {
+    const survey = surveys.find((s) => s.id === surveyId);
+    if (!survey) return;
+
+    setConfirmModal({
+      show: true,
+      surveyId: surveyId,
+      surveyTitle: survey.title,
+    });
+  };
+
+  /**
+   * Step 2: Execute delete with optimistic update
+   * - Removes survey from UI immediately (optimistic)
+   * - Makes API call to delete from database
+   * - Rolls back if API call fails
+   * - Shows toast notification for success/failure
+   * - Logs to activity feed (via database trigger)
+   */
+  const handleDeleteConfirm = async () => {
+    const surveyIdToDelete = confirmModal.surveyId;
+    const surveyTitle = confirmModal.surveyTitle;
+    if (!surveyIdToDelete) return;
+
+    // Close modal
+    setConfirmModal({ show: false, surveyId: null, surveyTitle: "" });
+
+    // Set loading state for the delete button
+    setDeletingId(surveyIdToDelete);
+
+    // OPTIMISTIC UPDATE: Step 1 - Save current state for rollback
+    const previousSurveys = [...surveys];
+
+    // OPTIMISTIC UPDATE: Step 2 - Update UI immediately (remove survey)
+    setSurveys(surveys.filter((survey) => survey.id !== surveyIdToDelete));
 
     try {
+      // OPTIMISTIC UPDATE: Step 3 - Make API call to delete from database
+      // Note: CASCADE DELETE is configured in database migration
+      // This will also delete related survey_questions and responses
+      // Activity feed entry is automatically created via database trigger
       const { error: deleteError } = await supabase
         .from("surveys")
         .delete()
-        .eq("id", surveyId);
+        .eq("id", surveyIdToDelete);
 
       if (deleteError) {
-        throw deleteError;
+        console.error("❌ Supabase delete error:", deleteError);
+        throw new Error(`Database error: ${deleteError.message} (Code: ${deleteError.code})`);
       }
 
-      // Refresh the list
-      fetchSurveys();
+      // OPTIMISTIC UPDATE: Step 4 - Success! Keep the optimistic update
+      showToast("Survey deleted successfully", "success");
+      
+      console.log(`✅ Survey deleted successfully: "${surveyTitle}" (${surveyIdToDelete})`);
+      console.log(`📊 Surveys remaining: ${surveys.length - 1}`);
+      
+      // Note: Dashboard stats will auto-update via Realtime subscription
+      // Activity feed entry was created via database trigger
     } catch (err) {
-      console.error("Error deleting survey:", err);
-      alert("Failed to delete survey. Please try again.");
+      // OPTIMISTIC UPDATE: Step 5 - Failure! Rollback to previous state
+      console.error("❌ Error deleting survey:", err);
+      
+      // Show detailed error in development
+      const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
+      console.error("Error details:", errorMessage);
+      
+      setSurveys(previousSurveys);
+      showToast(`Failed to delete survey: ${errorMessage}`, "error");
+    } finally {
+      setDeletingId(null);
     }
+  };
+
+  /**
+   * Cancel deletion - close modal
+   */
+  const handleDeleteCancel = () => {
+    setConfirmModal({ show: false, surveyId: null, surveyTitle: "" });
+  };
+
+  // ─────────────────────────────────────────────
+  // TOAST HELPER
+  // ─────────────────────────────────────────────
+  const showToast = (message: string, type: ToastType) => {
+    setToast({ message, type, show: true });
+  };
+
+  const closeToast = () => {
+    setToast((prev) => ({ ...prev, show: false }));
   };
 
   return (
@@ -145,13 +260,36 @@ export default function SurveyViewPage() {
                 key={survey.id}
                 survey={survey}
                 copiedId={copiedId}
+                deletingId={deletingId}
                 onCopyLink={handleCopyLink}
-                onDelete={handleDelete}
+                onDelete={handleDeleteClick}
               />
             ))}
           </div>
         )}
       </main>
+
+      {/* Confirmation Modal */}
+      {confirmModal.show && (
+        <ConfirmModal
+          title="Delete Survey?"
+          message={`Are you sure you want to delete "${confirmModal.surveyTitle}"? This will permanently delete the survey, all its questions, and all responses. This action cannot be undone.`}
+          confirmLabel="Delete Survey"
+          cancelLabel="Cancel"
+          onConfirm={handleDeleteConfirm}
+          onCancel={handleDeleteCancel}
+          isLoading={deletingId === confirmModal.surveyId}
+        />
+      )}
+
+      {/* Toast Notification */}
+      {toast.show && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={closeToast}
+        />
+      )}
     </div>
   );
 }
