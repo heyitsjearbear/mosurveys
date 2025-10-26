@@ -157,11 +157,62 @@ export default function SurveyResponsePage() {
         questionCount: Object.keys(answers).length
       });
 
+      // Log to activity feed
+      try {
+        const { error: activityError } = await supabase
+          .from("activity_feed")
+          .insert({
+            org_id: DEFAULT_ORG_ID,
+            type: 'RESPONSE_RECEIVED',
+            details: {
+              survey_id: surveyId,
+              survey_title: survey?.title || 'Unknown Survey',
+              response_id: responseData.id,
+            }
+          });
+
+        if (activityError) {
+          logger.error('Failed to log to activity feed', activityError, { responseId: responseData.id });
+        } else {
+          logger.debug('Activity logged successfully', { type: 'RESPONSE_RECEIVED', responseId: responseData.id });
+        }
+      } catch (activityErr) {
+        logger.error('Failed to log activity', activityErr);
+      }
+
+      // Trigger AI sentiment analysis (non-blocking)
+      try {
+        const analyzeResponse = await fetch('/api/openai/analyze', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            responseId: responseData.id,
+            surveyId: surveyId,
+            answers: answers,
+          }),
+        });
+
+        if (!analyzeResponse.ok) {
+          logger.warn('AI analysis request failed', { 
+            responseId: responseData.id,
+            status: analyzeResponse.status 
+          });
+        } else {
+          const analyzeData = await analyzeResponse.json();
+          logger.info('AI analysis completed', { 
+            responseId: responseData.id,
+            sentiment: analyzeData.analysis?.sentiment 
+          });
+        }
+      } catch (analyzeErr) {
+        // Don't block submission if analysis fails
+        logger.error('AI analysis error (non-blocking)', analyzeErr, { responseId: responseData.id });
+      }
+
       // Mark as submitted
       setIsSubmitted(true);
-
-      // TODO: Trigger webhook for RESPONSE_RECEIVED
-      // TODO: Trigger AI sentiment analysis
 
     } catch (err) {
       logger.error('Failed to submit survey response', err, { 
