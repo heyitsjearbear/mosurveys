@@ -84,7 +84,8 @@ export default function SurveyViewPage() {
       setLoading(true);
       setError(null);
 
-      const { data, error: fetchError } = await supabase
+      // Fetch surveys
+      const { data: surveysData, error: fetchError } = await supabase
         .from("surveys")
         .select("*")
         .eq("org_id", DEFAULT_ORG_ID)
@@ -94,8 +95,33 @@ export default function SurveyViewPage() {
         throw fetchError;
       }
 
-      setSurveys(data || []);
-      logger.debug('Surveys fetched successfully', { count: data?.length || 0 });
+      // Fetch response counts for each survey
+      if (surveysData && surveysData.length > 0) {
+        const surveyIds = surveysData.map(s => s.id);
+        
+        const { data: responseCounts, error: countError } = await supabase
+          .from("responses")
+          .select("survey_id")
+          .in("survey_id", surveyIds);
+
+        if (countError) {
+          logger.warn('Failed to fetch response counts', countError);
+        } else {
+          // Count responses per survey
+          const countsMap = (responseCounts || []).reduce((acc, r) => {
+            acc[r.survey_id] = (acc[r.survey_id] || 0) + 1;
+            return acc;
+          }, {} as Record<string, number>);
+
+          // Add count to each survey
+          surveysData.forEach((survey: any) => {
+            survey.responseCount = countsMap[survey.id] || 0;
+          });
+        }
+      }
+
+      setSurveys(surveysData || []);
+      logger.debug('Surveys fetched successfully', { count: surveysData?.length || 0 });
     } catch (err) {
       logger.error('Failed to fetch surveys', err);
       setError("Failed to load surveys. Please try again.");

@@ -5,6 +5,7 @@ import {
   TrashIcon,
   PencilSquareIcon,
   ClockIcon,
+  ChatBubbleLeftRightIcon,
 } from "@heroicons/react/24/outline";
 import type { Database } from "@/types/supabase";
 
@@ -24,7 +25,7 @@ type Survey = Database["public"]["Tables"]["surveys"]["Row"];
  */
 
 interface SurveyCardProps {
-  survey: Survey;
+  survey: Survey & { responseCount?: number };
   copiedId: string | null;
   deletingId: string | null;
   onCopyLink: (surveyId: string) => void;
@@ -67,6 +68,10 @@ export default function SurveyCard({ survey, copiedId, deletingId, onCopyLink, o
               </button>
             )}
           </div>
+          <span className="inline-flex items-center gap-1 px-2 py-1 bg-slate-100 text-slate-700 font-accent text-xs font-medium rounded-full">
+            <ChatBubbleLeftRightIcon className="w-3 h-3" />
+            {survey.responseCount || 0}
+          </span>
           <span className="font-body text-xs text-slate-500">
             {new Date(survey.created_at).toLocaleDateString()}
           </span>
