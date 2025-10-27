@@ -8,6 +8,7 @@ import {
   ClockIcon,
   ChatBubbleLeftRightIcon,
   ArrowDownTrayIcon,
+  EyeIcon,
 } from "@heroicons/react/24/outline";
 import type { Database } from "@/types/supabase";
 import { supabase } from "@/lib/supabaseClient";
@@ -38,10 +39,11 @@ interface SurveyCardProps {
   onCopyLink: (surveyId: string) => void;
   onDelete: (surveyId: string) => void;
   onViewHistory?: (surveyId: string) => void;
+  onViewQuestions?: (surveyId: string) => void;
   isLatest?: boolean;
 }
 
-export default function SurveyCard({ survey, copiedId, deletingId, onCopyLink, onDelete, onViewHistory, isLatest = false }: SurveyCardProps) {
+export default function SurveyCard({ survey, copiedId, deletingId, onCopyLink, onDelete, onViewHistory, onViewQuestions, isLatest = false }: SurveyCardProps) {
   const isDeleting = deletingId === survey.id;
   const [isDownloading, setIsDownloading] = useState(false);
 
@@ -159,6 +161,17 @@ export default function SurveyCard({ survey, copiedId, deletingId, onCopyLink, o
 
       {/* Actions */}
       <div className="flex flex-wrap gap-2">
+        {onViewQuestions && (
+          <button
+            onClick={() => onViewQuestions(survey.id)}
+            className="inline-flex items-center gap-1 px-3 py-1.5 bg-purple-100 text-purple-700 hover:bg-purple-200 font-accent text-xs font-medium rounded-lg transition-colors duration-200"
+            title="View questions"
+          >
+            <EyeIcon className="w-3.5 h-3.5" />
+            Questions
+          </button>
+        )}
+        
         <button
           onClick={() => onCopyLink(survey.id)}
           className="inline-flex items-center gap-1 px-3 py-1.5 bg-slate-100 text-slate-700 hover:bg-slate-200 font-accent text-xs font-medium rounded-lg transition-colors duration-200"
