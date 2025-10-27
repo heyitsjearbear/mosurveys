@@ -37,6 +37,7 @@ export default function CreateSurveyPage() {
     addQuestion,
     updateQuestion,
     deleteQuestion,
+    reorderQuestions,
     addOption,
     updateOption,
     deleteOption,
@@ -100,6 +101,7 @@ export default function CreateSurveyPage() {
             addQuestion={addQuestion}
             updateQuestion={updateQuestion}
             deleteQuestion={deleteQuestion}
+            reorderQuestions={reorderQuestions}
             addOption={addOption}
             updateOption={updateOption}
             deleteOption={deleteOption}

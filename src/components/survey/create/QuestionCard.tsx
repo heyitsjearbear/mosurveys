@@ -1,5 +1,7 @@
 import { PlusIcon, TrashIcon, Bars3Icon } from "@heroicons/react/24/outline";
 import type { Question, QuestionType } from "@/types/survey";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 // ─────────────────────────────────────────────
 // Question Card Component
@@ -24,15 +26,39 @@ export function QuestionCard({
   updateOption,
   deleteOption,
 }: QuestionCardProps) {
+  // Setup sortable functionality
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: question.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
   return (
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-6">
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="bg-white rounded-lg border border-slate-200 shadow-sm p-6"
+    >
       {/* Question Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-start gap-3 flex-1">
-          <div className="flex items-center gap-2 text-slate-400">
+          <button
+            className="flex items-center gap-2 text-slate-400 hover:text-slate-600 cursor-grab active:cursor-grabbing touch-none"
+            {...attributes}
+            {...listeners}
+          >
             <Bars3Icon className="w-5 h-5" />
             <span className="font-accent text-sm font-semibold">Q{index + 1}</span>
-          </div>
+          </button>
           <div className="flex-1">
             <input
               type="text"

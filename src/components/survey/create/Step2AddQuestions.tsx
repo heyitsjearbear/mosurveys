@@ -3,6 +3,20 @@ import type { SurveyData, QuestionType, Question } from "@/types/survey";
 import { QUESTION_TYPES } from "@/types/survey";
 import { QuestionTypeButton } from "./QuestionTypeButton";
 import { QuestionCard } from "./QuestionCard";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 
 // ─────────────────────────────────────────────
 // STEP 2: Add Questions Component
@@ -13,6 +27,7 @@ interface Step2AddQuestionsProps {
   addQuestion: (type: QuestionType) => void;
   updateQuestion: (id: string, updates: Partial<Question>) => void;
   deleteQuestion: (id: string) => void;
+  reorderQuestions: (activeId: string, overId: string) => void;
   addOption: (questionId: string) => void;
   updateOption: (questionId: string, optionIndex: number, value: string) => void;
   deleteOption: (questionId: string, optionIndex: number) => void;
@@ -25,12 +40,33 @@ export function Step2AddQuestions({
   addQuestion,
   updateQuestion,
   deleteQuestion,
+  reorderQuestions,
   addOption,
   updateOption,
   deleteOption,
   handleAIGenerate,
   isGeneratingAI,
 }: Step2AddQuestionsProps) {
+  // Setup drag-and-drop sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8, // 8px of movement required before drag starts
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  // Handle drag end
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      reorderQuestions(active.id as string, over.id as string);
+    }
+  };
   return (
     <div className="space-y-6">
       {/* Header with AI Button */}
@@ -75,18 +111,29 @@ export function Step2AddQuestions({
       {/* Question Cards */}
       {surveyData.questions.length > 0 && (
         <>
-          {surveyData.questions.map((question, index) => (
-            <QuestionCard
-              key={question.id}
-              question={question}
-              index={index}
-              updateQuestion={updateQuestion}
-              deleteQuestion={deleteQuestion}
-              addOption={addOption}
-              updateOption={updateOption}
-              deleteOption={deleteOption}
-            />
-          ))}
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext
+              items={surveyData.questions.map((q) => q.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              {surveyData.questions.map((question, index) => (
+                <QuestionCard
+                  key={question.id}
+                  question={question}
+                  index={index}
+                  updateQuestion={updateQuestion}
+                  deleteQuestion={deleteQuestion}
+                  addOption={addOption}
+                  updateOption={updateOption}
+                  deleteOption={deleteOption}
+                />
+              ))}
+            </SortableContext>
+          </DndContext>
 
           {/* Add Another Question */}
           <div className="bg-white rounded-lg border-2 border-dashed border-slate-300 p-6 hover:border-[#2663EB] transition-colors duration-200">
