@@ -33,6 +33,18 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Validate that all questions have text
+    const emptyQuestions = surveyData.questions.filter(q => !q.text || q.text.trim() === '')
+    if (emptyQuestions.length > 0) {
+      return NextResponse.json(
+        { 
+          success: false, 
+          error: `${emptyQuestions.length} question(s) are missing text. Please fill in all questions before saving.` 
+        },
+        { status: 400 }
+      )
+    }
+
     if (!orgId) {
       return NextResponse.json(
         { 
@@ -83,7 +95,10 @@ export async function POST(request: NextRequest) {
     if (questionsError) {
       logger.error('Failed to create survey questions', questionsError, {
         surveyId: survey.id,
-        questionCount: questionsToInsert.length
+        questionCount: questionsToInsert.length,
+        errorMessage: questionsError.message,
+        errorDetails: questionsError.details,
+        questionsData: questionsToInsert
       })
       // Rollback: delete the survey if questions fail
       await supabaseAdmin.from('surveys').delete().eq('id', survey.id)
