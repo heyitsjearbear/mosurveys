@@ -8,6 +8,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { supabase } from "@/lib/supabaseClient";
 import { createLogger } from "@/lib/logger";
+import { useUI } from "@/context";
 import type { Database } from "@/types/supabase";
 import { LoadingState, ErrorState, EmptyState, Toast, ConfirmModal } from "@/components/common";
 import { PageHeader } from "@/components/layout";
@@ -20,7 +21,6 @@ import {
   QuestionsPreviewModal,
   VersionHistoryModal,
 } from "@/components/survey/manage";
-import type { ViewMode, FilterState } from "@/components/survey/manage";
 import type { ToastType } from "@/components/common/Toast";
 
 const logger = createLogger('SurveyView');
@@ -52,24 +52,18 @@ interface ToastState {
 }
 
 export default function SurveyViewPage() {
+  // Get UI preferences from context
+  const { viewMode, setViewMode, filters, setFilters, showAllVersions, setShowAllVersions, isHydrated } = useUI();
+
   // Survey data state
   const [surveys, setSurveys] = useState<Survey[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
-  // View and filter state
-  const [viewMode, setViewMode] = useState<ViewMode>("grid");
-  const [filters, setFilters] = useState<FilterState>({
-    audience: "all",
-    dateRange: "all",
-    searchQuery: "",
-  });
-  
   // UI state
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [toast, setToast] = useState<ToastState>({ message: "", type: "success", show: false });
-  const [showAllVersions, setShowAllVersions] = useState(false);
   
   // Confirmation modal state
   const [confirmModal, setConfirmModal] = useState<{
@@ -415,7 +409,7 @@ export default function SurveyViewPage() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Filters and Controls */}
-        {!loading && !error && surveys.length > 0 && (
+        {!loading && !error && surveys.length > 0 && isHydrated && (
           <div className="space-y-4 mb-6">
             {/* Filter Controls */}
             <FilterControls

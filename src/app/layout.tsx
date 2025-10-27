@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Figtree, Inter_Tight, Plus_Jakarta_Sans, Fira_Mono } from "next/font/google";
+import { UIProvider } from "@/context";
 import "./globals.css";
 
 // MoSurveys Typography System
@@ -50,7 +51,9 @@ export default function RootLayout({
       <body
         className={`${figtree.variable} ${interTight.variable} ${plusJakartaSans.variable} ${firaMono.variable} antialiased`}
       >
-        {children}
+        <UIProvider>
+          {children}
+        </UIProvider>
       </body>
     </html>
   );
