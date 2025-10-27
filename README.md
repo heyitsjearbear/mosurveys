@@ -1,15 +1,105 @@
 # MoSurveys 📊
 
-A modern survey creation and management platform built with Next.js 15, TypeScript, Supabase, and OpenAI. Create surveys, collect responses, and gain AI-powered insights—all running locally.
+**An AI-powered survey management platform designed for the MoFlo Cloud ecosystem.**
 
-## 🎯 Features
+Create surveys in minutes, collect responses instantly, and get AI-generated insights automatically—without hiring a data scientist.
 
-- **Survey Builder** - Create custom surveys with multiple question types (text, multiple choice, rating, yes/no)
-- **Version Control** - Track survey changes with built-in versioning and changelog
-- **Response Collection** - Collect anonymous responses via shareable links
-- **AI-Powered Insights** - OpenAI integration for question suggestions and sentiment analysis
-- **Real-time Updates** - Live activity feed using Supabase Realtime
-- **Analytics Dashboard** - View response trends, sentiment analysis, and key metrics
+**Live Demo:** https://mosurveys.vercel.app/
+
+---
+
+## 📑 Table of Contents
+
+- [What is MoSurveys?](#-what-is-mosurveys)
+- [Key Features & Functionality](#-key-features--functionality)
+- [Tech Stack](#️-tech-stack)
+- [Getting Started](#-getting-started)
+- [Project Structure](#-project-structure)
+- [Available Scripts](#-available-scripts)
+- [Development Workflow](#-development-workflow)
+- [Database Schema](#️-database-schema)
+- [AI Features](#-ai-features-optional)
+- [Security](#-security)
+- [Assumptions & Limitations](#️-assumptions--limitations)
+- [Troubleshooting](#-troubleshooting)
+- [Resources](#-resources)
+- [Contributing](#-contributing)
+
+---
+
+## 📖 What is MoSurveys?
+
+MoSurveys is a modern feedback collection and analysis platform built specifically for small and medium-sized businesses. It bridges the gap between basic survey tools (like Google Forms) and expensive enterprise solutions (like Qualtrics).
+
+### The Problem It Solves
+
+Businesses struggle to:
+- **Collect feedback efficiently** - Manual survey creation takes hours
+- **Understand customer sentiment** - Reading hundreds of responses manually is time-consuming
+- **Get actionable insights** - No way to quantify satisfaction or spot trends
+- **Connect feedback to business actions** - Survey data lives in isolation from other tools
+
+### The MoSurveys Solution
+
+1. **AI-Powered Survey Creation** - Generate contextual questions in seconds using OpenAI
+2. **Instant Response Collection** - Shareable links that work on any device
+3. **Automatic Sentiment Analysis** - AI analyzes every response and generates summaries
+4. **Real-Time Analytics** - Live dashboard with sentiment trends and response tracking
+5. **MoFlo Ecosystem Integration** - Connects with MoMail, MoSocial, MoBlogs, MoLead, and more
+
+### Who It's For
+
+- **Marketing agencies** - Client satisfaction surveys
+- **SaaS companies** - Product feedback and feature requests
+- **E-commerce stores** - Post-purchase experience surveys
+- **Service businesses** - Customer satisfaction tracking
+- **HR teams** - Employee engagement surveys
+- **Content creators** - Audience feedback on blog posts and content
+
+---
+
+## ✨ Key Features & Functionality
+
+### 🎨 Survey Builder
+- **5 Question Types:**
+  - Short text (one-line answers)
+  - Long text (paragraph responses)
+  - Multiple choice (4-6 options)
+  - Rating scale (1-10 ratings)
+  - Yes/No (binary questions)
+- **Drag-and-drop reordering** for questions
+- **Inline editing** with real-time preview
+- **AI question generation** - Get 5 contextual questions in 3 seconds
+- **Survey versioning** - Track changes with changelog and restore previous versions
+
+### 📊 Response Collection
+- **Shareable links** - One-click copy for distribution
+- **Anonymous responses** - No login required for respondents
+- **Mobile-responsive forms** - Works on any device
+- **Progress indicator** - Shows completion percentage
+- **Real-time submission** - Instant capture with webhooks
+
+### 🤖 AI-Powered Analytics
+- **Automatic sentiment analysis** - Positive, Negative, Neutral, Mixed
+- **AI-generated summaries** - One-sentence insights for each response
+- **Question-specific analysis** - Understand patterns by question
+- **Graceful fallbacks** - Works with or without OpenAI API key (uses mock analysis)
+
+### 📈 Real-Time Dashboard
+- **Live activity feed** - See surveys created, responses received, analysis completed
+- **Sentiment distribution** - Pie charts showing sentiment breakdown
+- **Response tracking** - Monitor response count and engagement
+- **Survey management** - View, edit, delete, and analyze all surveys in one place
+- **Analytics per survey** - Deep dive into individual survey performance
+
+### 🔄 Advanced Features
+- **Survey versioning** - Create new versions while preserving response history
+- **Version comparison** - See what changed between versions
+- **Restore previous versions** - Roll back to earlier survey states
+- **Webhook integration** - All events sync to MoFlo activity feed
+- **Real-time updates** - Supabase Realtime for live data sync
+
+---
 
 ## 🛠️ Tech Stack
 
@@ -60,6 +150,20 @@ If you're developing features, contributing, or testing database changes:
 ---
 
 ## 🚀 Getting Started
+
+### ⚡ Quick Start Summary
+
+**Just want to run the app?** → Follow **Path 1** (2 minutes)
+- Get the `.env` file
+- Run `npm install` and `npm run dev`
+- Open http://localhost:3000
+
+**Want to develop/modify?** → Follow **Path 2** (10 minutes)
+- Create your own Supabase project
+- Run database migrations
+- Set up your own environment variables
+
+---
 
 ### For Demo/Testing (Path 1)
 
@@ -337,6 +441,101 @@ To enable AI features:
 - **Environment variables** for sensitive data (never committed)
 - **Input validation** on all forms and API routes
 - **Sanitized queries** using Supabase's built-in protections
+
+---
+
+## ⚠️ Assumptions & Limitations
+
+### Current Assumptions
+
+**1. Single Organization Model**
+- The app currently operates under a single default organization (`NEXT_PUBLIC_DEFAULT_ORG_ID`)
+- All surveys and responses belong to this one organization
+- Multi-tenancy is not yet implemented
+- **Rationale:** Simplifies demo/portfolio scope while maintaining production-ready architecture
+
+**2. Authentication Disabled for Demo**
+- Row Level Security (RLS) policies are currently permissive (`USING (true)`)
+- No user login or session management
+- Anyone can create, edit, or delete surveys
+- **Rationale:** Allows easy testing without auth setup barriers
+- **Migration Path:** RLS policies are ready—just needs Supabase Auth integration (3-4 days)
+
+**3. OpenAI Optional**
+- AI features gracefully fallback to mock analysis if API key is missing
+- Mock analysis uses basic keyword matching
+- **Rationale:** App remains functional without paid API keys
+
+**4. Anonymous Responses**
+- No respondent authentication or tracking
+- Cannot prevent duplicate responses from the same person
+- No email validation or identity verification
+- **Rationale:** Maximizes response rate by removing friction
+
+**5. Local Development Focus**
+- Optimized for localhost testing and development
+- Production deployment requires additional hardening
+- **Rationale:** Portfolio/internship project scope
+
+### Known Limitations
+
+**Security & Production Readiness**
+- ❌ **No authentication system** - Anyone can access admin features
+- ❌ **No webhook signature validation** - Webhook endpoint is unprotected
+- ❌ **No rate limiting** - API routes can be spammed
+- ❌ **Manual transaction rollback** - Not atomic (see TECH_DEBT_ASSESSMENT.md)
+- ⚠️ **Service role used in API routes** - Bypasses RLS (acceptable for single-org demo)
+
+**Features Not Yet Implemented**
+- ❌ **NPS (Net Promoter Score) calculation** - Planned for Phase 3
+- ❌ **User roles and permissions** - Admin, Editor, Viewer
+- ❌ **Email notifications** - For new responses or negative sentiment
+- ❌ **Export functionality** - CSV/Excel/PDF reports
+- ❌ **Survey templates library** - Pre-built industry templates
+- ❌ **Conditional branching** - Skip logic based on answers
+- ❌ **Multi-language support** - Currently English only
+- ❌ **Response editing** - Once submitted, cannot be modified
+- ❌ **Survey scheduling** - No start/end dates for surveys
+
+**Scalability Considerations**
+- ⚠️ **No query pagination** - Dashboard loads all surveys (fine for <1000 surveys)
+- ⚠️ **No caching strategy** - Every page load queries database
+- ⚠️ **No database connection pooling** - Default Supabase limits apply
+- ⚠️ **No CDN for assets** - Served directly from Next.js (Vercel handles in production)
+
+**Data & Analytics**
+- ⚠️ **Basic sentiment analysis only** - No topic clustering or trend analysis
+- ⚠️ **No comparative benchmarking** - Cannot compare against industry averages
+- ⚠️ **Limited data visualization** - Basic pie charts and tables
+- ⚠️ **No custom dashboards** - Fixed dashboard layout
+
+**Integration Limitations**
+- ❌ **No actual MoFlo integrations** - Architecture ready, but APIs not connected
+- ❌ **No Zapier/webhook API** - Cannot trigger external automations
+- ❌ **No email embedding** - Cannot directly embed surveys in emails
+- ❌ **No iframe/widget support** - Cannot embed on external websites
+
+### What This Means For You
+
+**✅ Perfect For:**
+- Demo/portfolio presentations
+- Local development and testing
+- Understanding modern full-stack architecture
+- Learning Next.js 15, Supabase, and OpenAI integration
+- Proof-of-concept for MoFlo ecosystem
+
+**⚠️ Not Ready For:**
+- Production deployment with real customers (without security hardening)
+- Multi-tenant SaaS (requires auth + org isolation)
+- High-volume response collection (needs rate limiting + caching)
+- Sensitive data collection (needs encryption + compliance)
+
+**🚀 Production Readiness Estimate:**
+- **Basic security fixes:** 3-4 days
+- **Full authentication:** 1 week
+- **Enterprise features:** 2-3 months
+
+See `TECH_DEBT_ASSESSMENT.md` for detailed technical audit and roadmap.
 
 ---
 
