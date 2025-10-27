@@ -1,3 +1,4 @@
+import { useState } from "react";
 import Link from "next/link";
 import {
   LinkIcon,
@@ -6,21 +7,27 @@ import {
   PencilSquareIcon,
   ClockIcon,
   ChatBubbleLeftRightIcon,
+  ArrowDownTrayIcon,
 } from "@heroicons/react/24/outline";
 import type { Database } from "@/types/supabase";
+import { supabase } from "@/lib/supabaseClient";
+import { createLogger } from "@/lib/logger";
+
+const logger = createLogger('SurveyCard');
 
 type Survey = Database["public"]["Tables"]["surveys"]["Row"];
 
 /**
  * SurveyCard Component
  * 
- * Displays a single survey with actions (copy link, edit, analytics, delete)
+ * Displays a single survey with actions (copy link, edit, analytics, download, delete)
  * Used in the survey management/view page
  * 
  * Features:
  * - Copy shareable survey link
  * - Edit survey (creates new version)
  * - Navigate to analytics dashboard
+ * - Download survey as JSON txt file (formatted per DB schema)
  * - Delete survey with loading state
  */
 
@@ -36,6 +43,78 @@ interface SurveyCardProps {
 
 export default function SurveyCard({ survey, copiedId, deletingId, onCopyLink, onDelete, onViewHistory, isLatest = false }: SurveyCardProps) {
   const isDeleting = deletingId === survey.id;
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  const handleDownload = async () => {
+    setIsDownloading(true);
+    try {
+      // Fetch survey data
+      const { data: surveyData, error: surveyError } = await supabase
+        .from('surveys')
+        .select('*')
+        .eq('id', survey.id)
+        .single();
+
+      if (surveyError) throw surveyError;
+
+      // Fetch questions
+      const { data: questions, error: questionsError } = await supabase
+        .from('survey_questions')
+        .select('*')
+        .eq('survey_id', survey.id)
+        .order('position', { ascending: true });
+
+      if (questionsError) throw questionsError;
+
+      // Format according to DB schema
+      const exportData = {
+        survey: {
+          id: surveyData.id,
+          org_id: surveyData.org_id,
+          title: surveyData.title,
+          description: surveyData.description,
+          audience: surveyData.audience,
+          version: surveyData.version,
+          parent_id: surveyData.parent_id,
+          changelog: surveyData.changelog,
+          ai_suggestions: surveyData.ai_suggestions,
+          created_at: surveyData.created_at,
+          updated_at: surveyData.updated_at,
+        },
+        questions: questions.map((q) => ({
+          id: q.id,
+          survey_id: q.survey_id,
+          position: q.position,
+          type: q.type,
+          question: q.question,
+          options: q.options,
+          required: q.required,
+          created_at: q.created_at,
+          updated_at: q.updated_at,
+        })),
+      };
+
+      // Create blob and download
+      const jsonString = JSON.stringify(exportData, null, 2);
+      const blob = new Blob([jsonString], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `survey-${survey.id}.txt`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      logger.info('Survey JSON downloaded', { surveyId: survey.id });
+    } catch (error) {
+      logger.error('Failed to download survey JSON', error, { surveyId: survey.id });
+      alert('Failed to download survey data. Please try again.');
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6 transition-all duration-200 hover:shadow-md hover:scale-[1.02]">
       {/* Survey Header */}
@@ -109,6 +188,25 @@ export default function SurveyCard({ survey, copiedId, deletingId, onCopyLink, o
           <ChartBarIcon className="w-3.5 h-3.5" />
           Analytics
         </Link>
+
+        <button
+          onClick={handleDownload}
+          disabled={isDownloading}
+          className="inline-flex items-center gap-1 px-3 py-1.5 bg-green-100 text-green-700 hover:bg-green-200 font-accent text-xs font-medium rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-green-100"
+          title="Download survey as JSON"
+        >
+          {isDownloading ? (
+            <>
+              <div className="w-3.5 h-3.5 border-2 border-green-700/30 border-t-green-700 rounded-full animate-spin" />
+              Downloading...
+            </>
+          ) : (
+            <>
+              <ArrowDownTrayIcon className="w-3.5 h-3.5" />
+              Download
+            </>
+          )}
+        </button>
 
         <button
           onClick={() => onDelete(survey.id)}

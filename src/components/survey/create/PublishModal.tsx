@@ -2,7 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowRightIcon, CheckIcon } from "@heroicons/react/24/outline";
+import { ArrowRightIcon, CheckIcon, ArrowDownTrayIcon } from "@heroicons/react/24/outline";
+import { supabase } from "@/lib/supabaseClient";
+import { createLogger } from "@/lib/logger";
+
+const logger = createLogger('PublishModal');
 
 // ─────────────────────────────────────────────
 // Publish Modal Component
@@ -16,6 +20,7 @@ interface PublishModalProps {
 
 export function PublishModal({ surveyTitle, surveyId, onClose }: PublishModalProps) {
   const [copied, setCopied] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
   
   // Generate real survey link using published survey ID
   const surveyLink = `${window.location.origin}/mojeremiah/respond/${surveyId}`;
@@ -24,6 +29,76 @@ export function PublishModal({ surveyTitle, surveyId, onClose }: PublishModalPro
     navigator.clipboard.writeText(surveyLink);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleDownload = async () => {
+    setIsDownloading(true);
+    try {
+      // Fetch survey data
+      const { data: survey, error: surveyError } = await supabase
+        .from('surveys')
+        .select('*')
+        .eq('id', surveyId)
+        .single();
+
+      if (surveyError) throw surveyError;
+
+      // Fetch questions
+      const { data: questions, error: questionsError } = await supabase
+        .from('survey_questions')
+        .select('*')
+        .eq('survey_id', surveyId)
+        .order('position', { ascending: true });
+
+      if (questionsError) throw questionsError;
+
+      // Format according to DB schema
+      const exportData = {
+        survey: {
+          id: survey.id,
+          org_id: survey.org_id,
+          title: survey.title,
+          description: survey.description,
+          audience: survey.audience,
+          version: survey.version,
+          parent_id: survey.parent_id,
+          changelog: survey.changelog,
+          ai_suggestions: survey.ai_suggestions,
+          created_at: survey.created_at,
+          updated_at: survey.updated_at,
+        },
+        questions: questions.map((q) => ({
+          id: q.id,
+          survey_id: q.survey_id,
+          position: q.position,
+          type: q.type,
+          question: q.question,
+          options: q.options,
+          required: q.required,
+          created_at: q.created_at,
+          updated_at: q.updated_at,
+        })),
+      };
+
+      // Create blob and download
+      const jsonString = JSON.stringify(exportData, null, 2);
+      const blob = new Blob([jsonString], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `survey-${surveyId}.txt`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      logger.info('Survey JSON downloaded', { surveyId });
+    } catch (error) {
+      logger.error('Failed to download survey JSON', error, { surveyId });
+      alert('Failed to download survey data. Please try again.');
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
   return (
@@ -62,6 +137,18 @@ export function PublishModal({ surveyTitle, surveyId, onClose }: PublishModalPro
               {copied ? "Copied!" : "Copy"}
             </button>
           </div>
+        </div>
+
+        {/* Download JSON Button */}
+        <div className="mb-6">
+          <button
+            onClick={handleDownload}
+            disabled={isDownloading}
+            className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 border-2 border-dashed border-slate-300 font-accent text-sm font-medium rounded-lg text-slate-700 bg-white hover:bg-slate-50 hover:border-[#2663EB] hover:text-[#2663EB] transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <ArrowDownTrayIcon className="w-5 h-5" />
+            {isDownloading ? "Downloading..." : "Download Survey as JSON (.txt)"}
+          </button>
         </div>
 
         {/* Action Buttons */}
