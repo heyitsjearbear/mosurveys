@@ -283,7 +283,7 @@ export default function SurveyResponsePage() {
                   <select
                     value={answers[question.id] || ""}
                     onChange={(e) => handleAnswerChange(question.id, e.target.value)}
-                    className={`w-full px-4 py-3 font-body text-base border rounded-lg focus:ring-2 focus:ring-[#2663EB] focus:border-transparent transition-all duration-200 ${
+                    className={`w-full px-4 py-3 font-body text-base text-slate-900 border rounded-lg focus:ring-2 focus:ring-[#2663EB] focus:border-transparent transition-all duration-200 ${
                       validationErrors[question.id] ? 'border-red-500' : 'border-slate-300'
                     }`}
                   >
@@ -298,7 +298,7 @@ export default function SurveyResponsePage() {
                   <select
                     value={answers[question.id] || ""}
                     onChange={(e) => handleAnswerChange(question.id, e.target.value)}
-                    className={`w-full px-4 py-3 font-body text-base border rounded-lg focus:ring-2 focus:ring-[#2663EB] focus:border-transparent transition-all duration-200 ${
+                    className={`w-full px-4 py-3 font-body text-base text-slate-900 border rounded-lg focus:ring-2 focus:ring-[#2663EB] focus:border-transparent transition-all duration-200 ${
                       validationErrors[question.id] ? 'border-red-500' : 'border-slate-300'
                     }`}
                   >
@@ -310,7 +310,7 @@ export default function SurveyResponsePage() {
                   <select
                     value={answers[question.id] || ""}
                     onChange={(e) => handleAnswerChange(question.id, e.target.value)}
-                    className={`w-full px-4 py-3 font-body text-base border rounded-lg focus:ring-2 focus:ring-[#2663EB] focus:border-transparent transition-all duration-200 ${
+                    className={`w-full px-4 py-3 font-body text-base text-slate-900 border rounded-lg focus:ring-2 focus:ring-[#2663EB] focus:border-transparent transition-all duration-200 ${
                       validationErrors[question.id] ? 'border-red-500' : 'border-slate-300'
                     }`}
                   >
@@ -326,7 +326,7 @@ export default function SurveyResponsePage() {
                     value={answers[question.id] || ""}
                     onChange={(e) => handleAnswerChange(question.id, e.target.value)}
                     rows={question.type === 'long_text' ? 4 : 2}
-                    className={`w-full px-4 py-3 font-body text-base border rounded-lg focus:ring-2 focus:ring-[#2663EB] focus:border-transparent transition-all duration-200 resize-none ${
+                    className={`w-full px-4 py-3 font-body text-base text-slate-900 placeholder:text-slate-400 border rounded-lg focus:ring-2 focus:ring-[#2663EB] focus:border-transparent transition-all duration-200 resize-none ${
                       validationErrors[question.id] ? 'border-red-500' : 'border-slate-300'
                     }`}
                     placeholder="Type your answer here..."

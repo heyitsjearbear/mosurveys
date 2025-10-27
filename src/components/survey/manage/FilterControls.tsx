@@ -59,7 +59,7 @@ export default function FilterControls({
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Search Input */}
         <div>
-          <label htmlFor="search" className="block font-body text-xs font-medium text-slate-700 mb-1">
+          <label htmlFor="search" className="block font-body text-xs font-medium text-slate-900 mb-1">
             Search
           </label>
           <input
@@ -68,20 +68,20 @@ export default function FilterControls({
             value={filters.searchQuery}
             onChange={(e) => onFilterChange({ ...filters, searchQuery: e.target.value })}
             placeholder="Search surveys..."
-            className="w-full px-3 py-2 font-body text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#2663EB] focus:border-transparent transition-all duration-200"
+            className="w-full px-3 py-2 font-body text-sm text-slate-900 placeholder:text-slate-400 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#2663EB] focus:border-transparent transition-all duration-200"
           />
         </div>
 
         {/* Audience Filter */}
         <div>
-          <label htmlFor="audience" className="block font-body text-xs font-medium text-slate-700 mb-1">
+          <label htmlFor="audience" className="block font-body text-xs font-medium text-slate-900 mb-1">
             Audience
           </label>
           <select
             id="audience"
             value={filters.audience}
             onChange={(e) => onFilterChange({ ...filters, audience: e.target.value })}
-            className="w-full px-3 py-2 font-body text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#2663EB] focus:border-transparent transition-all duration-200"
+            className="w-full px-3 py-2 font-body text-sm text-slate-900 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#2663EB] focus:border-transparent transition-all duration-200"
           >
             <option value="all">All Audiences</option>
             {audienceOptions.map((audience) => (
@@ -94,14 +94,14 @@ export default function FilterControls({
 
         {/* Date Range Filter */}
         <div>
-          <label htmlFor="dateRange" className="block font-body text-xs font-medium text-slate-700 mb-1">
+          <label htmlFor="dateRange" className="block font-body text-xs font-medium text-slate-900 mb-1">
             Date Range
           </label>
           <select
             id="dateRange"
             value={filters.dateRange}
             onChange={(e) => onFilterChange({ ...filters, dateRange: e.target.value as FilterState["dateRange"] })}
-            className="w-full px-3 py-2 font-body text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#2663EB] focus:border-transparent transition-all duration-200"
+            className="w-full px-3 py-2 font-body text-sm text-slate-900 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#2663EB] focus:border-transparent transition-all duration-200"
           >
             <option value="all">All Time</option>
             <option value="7days">Last 7 Days</option>
