@@ -1,12 +1,14 @@
 import { ReactNode } from "react";
-import type { Response } from "@/types/supabase";
-import { AnalyticsStatCard } from "./AnalyticsStatCard";
+import type { Database } from "@/types/supabase";
+import AnalyticsStatCard from "./AnalyticsStatCard";
 import { formatTimeAgo } from "@/lib/utils";
 import {
   ChatBubbleLeftRightIcon,
   FaceSmileIcon,
   ClockIcon,
 } from "@heroicons/react/24/outline";
+
+type Response = Database['public']['Tables']['responses']['Row'];
 
 interface AnalyticsData {
   total: number;
