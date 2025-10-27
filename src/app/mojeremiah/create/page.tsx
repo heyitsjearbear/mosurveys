@@ -81,7 +81,9 @@ export default function CreateSurveyPage() {
       return surveyData.title.trim() !== "" && surveyData.audience.trim() !== "";
     }
     if (currentStep === 2) {
-      return surveyData.questions.length > 0;
+      // Check that there's at least one question AND all questions have text
+      return surveyData.questions.length > 0 && 
+             surveyData.questions.every(q => q.text && q.text.trim() !== "");
     }
     return true;
   };
