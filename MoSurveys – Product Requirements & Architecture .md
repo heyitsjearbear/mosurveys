@@ -21,7 +21,7 @@ It leverages:
 | --- | --- |
 | **Landing Dashboard** (`/mojeremiah`) | Displays real-time survey metrics (Total Responses, Sentiment %) and an activity feed synced via Supabase Realtime. |
 | **Survey Builder** (`/mojeremiah/create`) | Step-by-step builder with validation, AI question generation, and Supabase persistence. |
-| **Manage View** (`/mojeremiah/view`) | View, edit, filter, clone, and version surveys with a grid/table layout toggle. |
+| **Manage View** (`/mojeremiah/view`) | View, edit, filter, and version surveys with a grid/table layout toggle. |
 | **Response Form** (`/mojeremiah/respond/[surveyId]`) | Public form for customers to take surveys; submissions trigger analytics updates and sentiment classification. |
 | **Analytics Dashboard** (`/mojeremiah/analytics/[surveyId]`) | Displays computed metrics such as sentiment distribution and AI-generated summaries. |
 | **Realtime Webhooks** | Logs survey creation and responses in the `activity_feed` table for cross-app visibility. |
@@ -163,7 +163,7 @@ It leverages:
 - Load surveys from Supabase + local `/public/surveys.txt`.
 - Switch between **Grid** and **Table** view using Context.
 - Filter by audience, creation date, or sentiment.
-- Edit / Delete / Clone (increment version numbers).
+- Edit / Delete (increment version numbers).
 - Copy survey link and open analytics in one click.
 
 ---
