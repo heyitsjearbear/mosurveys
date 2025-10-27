@@ -14,3 +14,11 @@ export { default as AnalyticsEmptyState } from "./AnalyticsEmptyState";
 export { default as AnalyticsCallToAction } from "./AnalyticsCallToAction";
 export { default as ResponseCard } from "./ResponseCard";
 export { default as AIInsightCard } from "./AIInsightCard";
+
+// Newly extracted components
+export { VersionSelector } from "./VersionSelector";
+export { SentimentBreakdown } from "./SentimentBreakdown";
+export { ExportActions } from "./ExportActions";
+export { EmptyResponsesState } from "./EmptyResponsesState";
+export { NewResponseNotification } from "./NewResponseNotification";
+export { StatsGrid } from "./StatsGrid";
