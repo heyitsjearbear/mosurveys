@@ -19,11 +19,11 @@ It leverages:
 
 | Feature | Description |
 | --- | --- |
-| **Landing Dashboard** (`/mojeremiah`) | Displays real-time survey metrics (Total Responses, Avg NPS, Sentiment %) and an activity feed synced via Supabase Realtime. |
+| **Landing Dashboard** (`/mojeremiah`) | Displays real-time survey metrics (Total Responses, Sentiment %) and an activity feed synced via Supabase Realtime. |
 | **Survey Builder** (`/mojeremiah/create`) | Step-by-step builder with validation, AI question generation, and Supabase persistence. |
 | **Manage View** (`/mojeremiah/view`) | View, edit, filter, clone, and version surveys with a grid/table layout toggle. |
 | **Response Form** (`/mojeremiah/respond/[surveyId]`) | Public form for customers to take surveys; submissions trigger analytics updates and sentiment classification. |
-| **Analytics Dashboard** (`/mojeremiah/analytics/[surveyId]`) | Displays computed metrics such as NPS, sentiment distribution, and AI-generated summaries. |
+| **Analytics Dashboard** (`/mojeremiah/analytics/[surveyId]`) | Displays computed metrics such as sentiment distribution and AI-generated summaries. |
 | **Realtime Webhooks** | Logs survey creation and responses in the `activity_feed` table for cross-app visibility. |
 | **OpenAI Integration** | `/api/openai/generate` for question drafts; `/api/openai/analyze` for response sentiment. |
 
@@ -63,7 +63,6 @@ It leverages:
 
 - **Insight Cards:**
     - Total Surveys
-    - Avg NPS
     - % Positive Sentiment
 - **AI Summary Card (OpenAI):**
     
@@ -174,8 +173,6 @@ It leverages:
 **Purpose:** Provide high-level analytics and summaries.
 
 **Displayed Metrics:**
-
-- NPS Score = (% Promoters − % Detractors)
 - Sentiment Breakdown Pie Chart
 - Total Responses Over Time (Realtime updates via Supabase)
 - AI-Generated Insights from `/api/openai/analyze` summaries
