@@ -50,6 +50,7 @@ export default function EditSurveyPage() {
     addQuestion,
     updateQuestion,
     deleteQuestion,
+    reorderQuestions,
     addOption,
     updateOption,
     deleteOption,
@@ -117,6 +118,7 @@ export default function EditSurveyPage() {
             addQuestion={addQuestion}
             updateQuestion={updateQuestion}
             deleteQuestion={deleteQuestion}
+            reorderQuestions={reorderQuestions}
             addOption={addOption}
             updateOption={updateOption}
             deleteOption={deleteOption}

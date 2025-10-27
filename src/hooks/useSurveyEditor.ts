@@ -149,6 +149,17 @@ export function useSurveyEditor(surveyId: string | null) {
     });
   };
 
+  const reorderQuestions = (activeId: string, overId: string) => {
+    const activeIndex = surveyData.questions.findIndex(q => q.id === activeId);
+    const overIndex = surveyData.questions.findIndex(q => q.id === overId);
+    
+    if (activeIndex !== -1 && overIndex !== -1) {
+      const newQuestions = [...surveyData.questions];
+      [newQuestions[activeIndex], newQuestions[overIndex]] = [newQuestions[overIndex], newQuestions[activeIndex]];
+      setSurveyData({ ...surveyData, questions: newQuestions });
+    }
+  };
+
   // ─────────────────────────────────────────────
   // Multiple Choice Option Management
   // ─────────────────────────────────────────────
@@ -302,6 +313,7 @@ export function useSurveyEditor(surveyId: string | null) {
     addQuestion,
     updateQuestion,
     deleteQuestion,
+    reorderQuestions,
     addOption,
     updateOption,
     deleteOption,
