@@ -14,6 +14,8 @@ import {
 import { supabase } from "@/lib/supabaseClient";
 import { createLogger } from "@/lib/logger";
 import type { Database } from "@/types/supabase";
+import { formatTimeAgo } from "@/lib/utils";
+import { LoadingState, ErrorState } from "@/components/common";
 import type { 
   ActivityDetails, 
   SurveyCreatedDetails,
@@ -201,20 +203,6 @@ export default function ActivityFeed() {
     }
   };
 
-  // Helper function to format time ago
-  const formatTimeAgo = (timestamp: string) => {
-    const now = new Date();
-    const activityTime = new Date(timestamp);
-    const diffMs = now.getTime() - activityTime.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMins / 60);
-    const diffDays = Math.floor(diffHours / 24);
-
-    if (diffMins < 1) return "Just now";
-    if (diffMins < 60) return `${diffMins} minute${diffMins > 1 ? "s" : ""} ago`;
-    if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
-    return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
-  };
 
   // Helper function to get description from details
   // 
@@ -295,24 +283,15 @@ export default function ActivityFeed() {
       
       {/* Loading State */}
       {loading && (
-        <div className="p-12 text-center">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-[#2663EB] border-t-transparent"></div>
-          <p className="font-body text-slate-600 mt-4">Loading activity feed...</p>
+        <div className="p-6">
+          <LoadingState message="Loading activity feed..." />
         </div>
       )}
 
       {/* Error State */}
       {error && !loading && (
         <div className="p-6">
-          <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-            <p className="font-body text-red-700">{error}</p>
-            <button
-              onClick={fetchActivities}
-              className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200"
-            >
-              Try Again
-            </button>
-          </div>
+          <ErrorState message={error} onRetry={fetchActivities} />
         </div>
       )}
 

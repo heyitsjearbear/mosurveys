@@ -7,6 +7,9 @@
  * @param recentResponses - Array of recent responses with sentiment analysis
  */
 
+import { formatTimeAgo } from "@/lib/utils";
+import { getSentimentColor, getSentimentEmoji } from "@/components/common";
+
 interface Response {
   id: string;
   created_at: string;
@@ -34,30 +37,6 @@ export default function RecentFeedbackCard({
 }: RecentFeedbackCardProps) {
   const displayedResponses = recentResponses.slice(0, limit);
 
-  // Helper function to calculate time ago
-  const getTimeAgo = (createdAt: string): string => {
-    const now = new Date();
-    const responseTime = new Date(createdAt);
-    const diffMs = now.getTime() - responseTime.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-    const diffDays = Math.floor(diffMs / 86400000);
-
-    if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffHours < 24) return `${diffHours}h ago`;
-    return `${diffDays}d ago`;
-  };
-
-  // Helper function to get sentiment styling
-  const getSentimentStyle = (sentiment: string | null) => {
-    const styles = {
-      positive: { color: 'text-green-600 bg-green-100', emoji: '😊' },
-      negative: { color: 'text-red-600 bg-red-100', emoji: '😞' },
-      neutral: { color: 'text-slate-600 bg-slate-100', emoji: '😐' },
-      mixed: { color: 'text-amber-600 bg-amber-100', emoji: '🤔' },
-    };
-    return styles[sentiment as keyof typeof styles] || styles.neutral;
-  };
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
@@ -66,8 +45,9 @@ export default function RecentFeedbackCard({
       </h4>
       <div className="space-y-3">
         {displayedResponses.map((item) => {
-          const timeAgo = getTimeAgo(item.response.created_at);
-          const sentimentStyle = getSentimentStyle(item.response.sentiment);
+          const timeAgo = formatTimeAgo(item.response.created_at, { shortFormat: true });
+          const sentimentColor = getSentimentColor(item.response.sentiment as 'positive' | 'negative' | 'neutral' | 'mixed' | null);
+          const sentimentEmoji = getSentimentEmoji(item.response.sentiment as 'positive' | 'negative' | 'neutral' | 'mixed' | null);
 
           return (
             <div
@@ -79,9 +59,9 @@ export default function RecentFeedbackCard({
                   {item.survey?.title || 'Unknown Survey'}
                 </p>
                 <span
-                  className={`inline-flex items-center gap-1 px-2 py-0.5 ${sentimentStyle.color} font-accent text-xs font-medium rounded-full ml-2`}
+                  className={`inline-flex items-center gap-1 px-2 py-0.5 ${sentimentColor} font-accent text-xs font-medium rounded-full ml-2`}
                 >
-                  {sentimentStyle.emoji}
+                  {sentimentEmoji}
                 </span>
               </div>
               <p className="font-body text-sm text-slate-700 line-clamp-2">

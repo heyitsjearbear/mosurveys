@@ -12,8 +12,9 @@ import {
   AnalyticsStatCard 
 } from "@/components/analytics";
 import { LoadingState, ErrorState } from "@/components/common";
+import { PageHeader } from "@/components/layout";
+import { formatTimeAgo, exportToCSV, exportToJSON, formatSurveyDataForCSV, formatISODate } from "@/lib/utils";
 import {
-  ArrowLeftIcon,
   ChatBubbleLeftRightIcon,
   FaceSmileIcon,
   ClockIcon,
@@ -215,37 +216,10 @@ export default function AnalyticsPage() {
   const handleExportCSV = () => {
     if (responses.length === 0) return;
 
-    // Build CSV content
-    const headers = ['Response ID', 'Timestamp', 'Sentiment', ...questions.map(q => q.question)];
-    const rows = responses.map((response) => {
-      const answers = response.answers as Record<string, string>;
-      return [
-        response.id,
-        new Date(response.created_at).toISOString(),
-        response.sentiment || 'Not Analyzed',
-        ...questions.map((q) => {
-          const answer = answers[q.id.toString()] || '';
-          // Escape quotes and wrap in quotes if contains comma
-          return answer.includes(',') || answer.includes('"') 
-            ? `"${answer.replace(/"/g, '""')}"` 
-            : answer;
-        }),
-      ];
-    });
-
-    const csv = [headers.join(','), ...rows.map((row) => row.join(','))].join('\n');
-
-    // Download
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${survey?.title || 'survey'}-analytics-${new Date().toISOString().split('T')[0]}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-
+    const csvData = formatSurveyDataForCSV(responses, questions);
+    const filename = `${survey?.title || 'survey'}-analytics-${formatISODate(new Date().toISOString())}`;
+    
+    exportToCSV(csvData, filename);
     logger.info('Analytics exported to CSV', { surveyId, responseCount: responses.length });
   };
 
@@ -281,33 +255,10 @@ export default function AnalyticsPage() {
       exportedAt: new Date().toISOString(),
     };
 
-    const json = JSON.stringify(data, null, 2);
-    const blob = new Blob([json], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${survey?.title || 'survey'}-analytics-${new Date().toISOString().split('T')[0]}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-
+    const filename = `${survey?.title || 'survey'}-analytics-${formatISODate(new Date().toISOString())}`;
+    exportToJSON(data, filename);
+    
     logger.info('Analytics exported to JSON', { surveyId, responseCount: responses.length });
-  };
-
-  // Format time ago
-  const formatTimeAgo = (timestamp: string) => {
-    const date = new Date(timestamp);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-    const diffDays = Math.floor(diffMs / 86400000);
-
-    if (diffMins < 1) return 'Just now';
-    if (diffMins < 60) return `${diffMins} min ago`;
-    if (diffHours < 24) return `${diffHours} hr ago`;
-    return `${diffDays} days ago`;
   };
 
   // Loading state
@@ -328,49 +279,34 @@ export default function AnalyticsPage() {
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Link
-                href="/mojeremiah/view"
-                className="group inline-flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors duration-200"
-              >
-                <ArrowLeftIcon className="w-5 h-5" />
-                <span className="font-accent text-sm font-medium">Back to Surveys</span>
-              </Link>
-              <div className="h-6 w-px bg-slate-300"></div>
-              <div>
-                <h1 className="font-heading text-xl font-semibold text-slate-900">
-                  {survey.title}
-                </h1>
-                <div className="flex items-center gap-2 mt-1">
-                  <span className="inline-flex items-center px-2 py-0.5 bg-blue-100 text-[#2663EB] font-accent text-xs font-medium rounded-full">
-                    v{survey.version}
-                  </span>
-                  {survey.audience && (
-                    <span className="font-body text-xs text-slate-500">
-                      {survey.audience}
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Actions */}
-            <div className="flex items-center gap-2">
-              <button
-                onClick={handleRefresh}
-                disabled={refreshing}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-accent text-sm font-medium rounded-lg transition-colors duration-200 disabled:opacity-50"
-              >
-                <ArrowPathIcon className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
-                {refreshing ? 'Refreshing...' : 'Refresh'}
-              </button>
-            </div>
+      <PageHeader
+        backHref="/mojeremiah/view"
+        backLabel="Back to Surveys"
+        title={survey.title}
+        subtitle={
+          <div className="flex items-center gap-2 mt-1 justify-center">
+            <span className="inline-flex items-center px-2 py-0.5 bg-blue-100 text-[#2663EB] font-accent text-xs font-medium rounded-full">
+              v{survey.version}
+            </span>
+            {survey.audience && (
+              <span className="font-body text-xs text-slate-500">
+                {survey.audience}
+              </span>
+            )}
           </div>
-        </div>
-      </header>
+        }
+        action={
+          <button
+            onClick={handleRefresh}
+            disabled={refreshing}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-accent text-sm font-medium rounded-lg transition-colors duration-200 disabled:opacity-50"
+          >
+            <ArrowPathIcon className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
+            {refreshing ? 'Refreshing...' : 'Refresh'}
+          </button>
+        }
+        sticky={true}
+      />
 
       {/* New Response Notification */}
       {hasNewResponses && (

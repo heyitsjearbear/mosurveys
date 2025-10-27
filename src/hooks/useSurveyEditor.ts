@@ -12,7 +12,7 @@ const logger = createLogger('SurveyEditor');
 // Loads survey data from database, allows editing, and saves as new version.
 
 interface DbQuestion {
-  id: string;
+  id: number;
   survey_id: string;
   question: string;
   type: string;
@@ -79,7 +79,7 @@ export function useSurveyEditor(surveyId: string | null) {
 
         // Convert database questions to Question format
         const convertedQuestions: Question[] = (questions as DbQuestion[]).map((q) => ({
-          id: q.id,
+          id: q.id.toString(),
           type: q.type as QuestionType,
           text: q.question,
           required: q.required,
@@ -90,7 +90,7 @@ export function useSurveyEditor(surveyId: string | null) {
         setSurveyData({
           title: survey.title,
           description: survey.description || "",
-          audience: survey.audience,
+          audience: survey.audience || "",
           questions: convertedQuestions,
         });
 

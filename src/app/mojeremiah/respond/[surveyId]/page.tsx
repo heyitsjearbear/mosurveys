@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import { createLogger } from "@/lib/logger";
 import type { Database } from "@/types/supabase";
-import { LoadingState, ErrorState } from "@/components/common";
+import { LoadingState, ErrorState, SuccessState } from "@/components/common";
 
 const logger = createLogger('SurveyResponse');
 
@@ -244,23 +244,10 @@ export default function SurveyResponsePage() {
   // Success state (after submission)
   if (isSubmitted) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-8 max-w-md w-full text-center">
-          <div className="mb-4">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full">
-              <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-          </div>
-          <h2 className="font-heading text-2xl font-semibold text-slate-900 mb-2">
-            Thank You!
-          </h2>
-          <p className="font-body text-slate-600">
-            Your response has been submitted successfully.
-          </p>
-        </div>
-      </div>
+      <SuccessState
+        title="Thank You!"
+        message="Your response has been submitted successfully."
+      />
     );
   }
 

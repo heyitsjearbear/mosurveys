@@ -11,6 +11,8 @@ import { Step2AddQuestions } from "@/components/survey/create/Step2AddQuestions"
 import { Step3ReviewEdit } from "@/components/survey/edit/Step3ReviewEdit";
 import { NavigationButtons } from "@/components/survey/create/NavigationButtons";
 import { AIPreviewModal } from "@/components/survey/create/AIPreviewModal";
+import { PageHeader } from "@/components/layout";
+import { LoadingState, ErrorState } from "@/components/common";
 
 // ─────────────────────────────────────────────
 // Survey Edit Page
@@ -143,39 +145,11 @@ export default function EditSurveyPage() {
   // ─────────────────────────────────────────────
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-[#2663EB] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="font-body text-base text-slate-600">Loading survey data...</p>
-        </div>
-      </div>
-    );
+    return <LoadingState message="Loading survey data..." />;
   }
 
   if (loadError) {
-    return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="text-center max-w-md">
-          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="text-3xl">⚠️</span>
-          </div>
-          <h2 className="font-heading text-2xl font-semibold text-slate-900 mb-2">
-            Failed to Load Survey
-          </h2>
-          <p className="font-body text-base text-slate-600 mb-6">
-            {loadError}
-          </p>
-          <Link
-            href="/mojeremiah/view"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-[#2663EB] text-white font-accent text-base font-medium rounded-lg hover:bg-[#2054C8] transition-colors duration-200"
-          >
-            <ArrowLeftIcon className="w-5 h-5" />
-            Back to Surveys
-          </Link>
-        </div>
-      </div>
-    );
+    return <ErrorState message={loadError} />;
   }
 
   // ─────────────────────────────────────────────
@@ -185,28 +159,12 @@ export default function EditSurveyPage() {
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
-      <header className="bg-white border-b border-slate-200">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <Link
-              href="/mojeremiah/view"
-              className="group inline-flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors duration-200"
-            >
-              <ArrowLeftIcon className="w-5 h-5" />
-              <span className="font-accent text-sm font-medium">Back to Surveys</span>
-            </Link>
-            <div className="text-center">
-              <h1 className="font-heading text-2xl font-semibold text-slate-900">
-                Edit Survey
-              </h1>
-              <p className="font-accent text-xs text-slate-500 mt-1">
-                Creating version {originalVersion ? `${Math.floor(originalVersion) + (isMajorVersion ? 1 : 0)}.${isMajorVersion ? 0 : Math.round((originalVersion % 1) * 10) + 1}` : '...'}
-              </p>
-            </div>
-            <div className="w-32" /> {/* Spacer for center alignment */}
-          </div>
-        </div>
-      </header>
+      <PageHeader
+        backHref="/mojeremiah/view"
+        backLabel="Back to Surveys"
+        title="Edit Survey"
+        subtitle={`Creating version ${originalVersion ? `${Math.floor(originalVersion) + (isMajorVersion ? 1 : 0)}.${isMajorVersion ? 0 : Math.round((originalVersion % 1) * 10) + 1}` : '...'}`}
+      />
 
       {/* Progress Bar */}
       <ProgressBar
