@@ -6,7 +6,41 @@ Create surveys in minutes, collect responses instantly, and get AI-generated ins
 
 **Live Demo:** https://mosurveys.vercel.app/
 
----
+## About
+
+MoSurveys is a lightweight survey creation and management platform that helps teams build surveys, collect responses (anonymous or identified), and analyze results with optional AI-powered insights. It includes a drag-and-drop survey builder, built-in versioning, a realtime activity feed, and an analytics dashboard. The project is suitable for local demos and small production deployments backed by Supabase.
+
+## Setup & Run (summary)
+
+There are two common paths:
+
+- **Path 1 — Demo / Testing**: Use the provided `.env` from the project owner and run the app locally (no personal Supabase required).
+- **Path 2 — Active Development**: Create your own Supabase project, apply migrations, and generate types. See the full Getting Started section below for step-by-step commands.
+
+Common commands:
+```bash
+npm install
+npm run dev        # start dev server
+npm run db:push    # apply supabase migrations (dev)
+npm run db:types   # generate TypeScript types
+```
+
+## Key features & functionality
+
+- **Survey builder**: Create surveys with multiple question types (text, multiple choice, rating, yes/no) and reorder questions.
+- **Versioning & changelogs**: Track changes and maintain previous versions of a survey.
+- **Response collection**: Public shareable links for collecting responses; supports anonymous responses.
+- **Realtime activity feed**: Live updates using Supabase Realtime and webhook-driven event logging.
+- **Analytics & AI**: Dashboard metrics plus optional OpenAI-powered question suggestions, sentiment analysis, and response summaries.
+- **Extensible API**: Server endpoints and modular lib code for adding integrations or custom processing.
+
+## Assumptions & limitations
+
+- Designed primarily as a demo / lightweight production prototype — not an enterprise-grade survey platform.
+- AI features require a valid `OPENAI_API_KEY` and are optional; the app gracefully falls back when unavailable.
+- Supabase is required for persistence and realtime features; Row Level Security (RLS) is assumed to be configured via migrations.
+- No full multi-tenant user-management is implemented beyond organization IDs; add custom auth for stricter isolation.
+- Not optimized for extremely high scale (millions of responses) without adding pagination, caching, and horizontal scaling.
 
 ## 📑 Table of Contents
 
