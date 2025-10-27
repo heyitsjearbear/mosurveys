@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import {
   ClipboardDocumentListIcon,
@@ -11,11 +10,10 @@ import {
   SparklesIcon,
   ArrowRightIcon,
 } from "@heroicons/react/24/outline";
-import { supabase } from "@/lib/supabaseClient";
-import { createLogger } from "@/lib/logger";
 import type { Database } from "@/types/supabase";
 import { formatTimeAgo } from "@/lib/utils";
 import { LoadingState, ErrorState } from "@/components/common";
+import { useRealtimeActivityFeed } from "@/hooks/useRealtimeActivityFeed";
 import type { 
   ActivityDetails, 
   SurveyCreatedDetails,
@@ -26,12 +24,7 @@ import type {
   SurveyEditedDetails
 } from "@/types/activity";
 
-const logger = createLogger('ActivityFeed');
-
 type ActivityFeedRow = Database["public"]["Tables"]["activity_feed"]["Row"];
-
-// Get default org ID from environment or use fallback
-const DEFAULT_ORG_ID = process.env.NEXT_PUBLIC_DEFAULT_ORG_ID || '00000000-0000-0000-0000-000000000001';
 
 /**
  * ActivityFeed Component
@@ -39,114 +32,14 @@ const DEFAULT_ORG_ID = process.env.NEXT_PUBLIC_DEFAULT_ORG_ID || '00000000-0000-
  * Displays real-time activity feed with Supabase Realtime subscriptions.
  * Shows survey creation, responses, updates, deletions, and AI summary generation events.
  * 
+ * 
  * Features:
  * - Realtime updates via Supabase subscriptions
  * - Proper cleanup to prevent memory leaks
  * - Safe state updates (checks if component is mounted)
  */
 export default function ActivityFeed() {
-  const [activities, setActivities] = useState<ActivityFeedRow[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [realtimeStatus, setRealtimeStatus] = useState<'connecting' | 'connected' | 'error'>('connecting');
-  
-  // Track if component is mounted to prevent state updates after unmount
-  const isMountedRef = useRef(true);
-
-  // Fetch activities on mount and subscribe to real-time updates
-  useEffect(() => {
-    // Mark component as mounted
-    isMountedRef.current = true;
-    
-    fetchActivities();
-
-    logger.debug('Setting up Realtime subscription for activity feed');
-    
-    // Subscribe to real-time updates
-    const channel = supabase.channel("activity_feed_changes");
-    
-    channel
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "activity_feed",
-          filter: `org_id=eq.${DEFAULT_ORG_ID}`,
-        },
-        (payload) => {
-          logger.debug('Activity feed update received', { event: payload.eventType });
-          // Refresh activities when there's a change (only if still mounted)
-          if (isMountedRef.current) {
-            fetchActivities();
-          }
-        }
-      )
-      .subscribe((status, err) => {
-        // Only update state if component is still mounted
-        if (!isMountedRef.current) return;
-        
-        logger.debug('Realtime subscription status changed', { status });
-        
-        if (status === 'SUBSCRIBED') {
-          logger.info('Realtime connection established');
-          setRealtimeStatus('connected');
-        } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
-          logger.error('Realtime connection failed', err, { status });
-          setRealtimeStatus('error');
-        }
-        // Note: 'CLOSED' status is expected during cleanup, so we ignore it
-        else if (status === 'CLOSED') {
-          logger.debug('Realtime connection closed (cleanup)');
-        }
-      });
-
-    // Cleanup subscription on unmount
-    return () => {
-      logger.debug('Cleaning up Realtime subscription');
-      isMountedRef.current = false; // Mark as unmounted BEFORE unsubscribe
-      supabase.removeChannel(channel);
-    };
-  }, []);
-
-  const fetchActivities = async () => {
-    try {
-      // Only update state if component is still mounted
-      if (!isMountedRef.current) return;
-      
-      setLoading(true);
-      setError(null);
-
-      const { data, error: fetchError } = await supabase
-        .from("activity_feed")
-        .select("*")
-        .eq("org_id", DEFAULT_ORG_ID)
-        .order("created_at", { ascending: false })
-        .limit(10); // Limit to most recent 10 activities on dashboard
-
-      if (fetchError) {
-        throw fetchError;
-      }
-
-      logger.debug('Activities fetched successfully', { count: data?.length || 0 });
-      
-      // Only update state if component is still mounted
-      if (isMountedRef.current) {
-        setActivities(data || []);
-      }
-    } catch (err) {
-      logger.error('Failed to fetch activities', err);
-      // Only update state if component is still mounted
-      if (isMountedRef.current) {
-        setError("Failed to load activity feed. Please try again.");
-      }
-    } finally {
-      // Only update state if component is still mounted
-      if (isMountedRef.current) {
-        setLoading(false);
-      }
-    }
-  };
+  const { activities, loading, error, realtimeStatus, refetch } = useRealtimeActivityFeed();
 
   // Helper function to get icon and color for activity type
   const getActivityStyle = (type: string) => {
@@ -291,7 +184,7 @@ export default function ActivityFeed() {
       {/* Error State */}
       {error && !loading && (
         <div className="p-6">
-          <ErrorState message={error} onRetry={fetchActivities} />
+          <ErrorState message={error} onRetry={refetch} />
         </div>
       )}
 
