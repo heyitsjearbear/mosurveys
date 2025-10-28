@@ -4,43 +4,9 @@
 
 Create surveys in minutes, collect responses instantly, and get AI-generated insights automatically—without hiring a data scientist.
 
-**Live Demo:** https://mosurveys.vercel.app/
+- **Live Demo:** https://mosurveys.vercel.app/
+- **Explanation/Demo Video**: https://youtu.be/2815QhCz7oc
 
-## About
-
-MoSurveys is a lightweight survey creation and management platform that helps teams build surveys, collect responses (anonymous or identified), and analyze results with optional AI-powered insights. It includes a drag-and-drop survey builder, built-in versioning, a realtime activity feed, and an analytics dashboard. The project is suitable for local demos and small production deployments backed by Supabase.
-
-## Setup & Run (summary)
-
-There are two common paths:
-
-- **Path 1 — Demo / Testing**: Use the provided `.env` from the project owner and run the app locally (no personal Supabase required).
-- **Path 2 — Active Development**: Create your own Supabase project, apply migrations, and generate types. See the full Getting Started section below for step-by-step commands.
-
-Common commands:
-```bash
-npm install
-npm run dev        # start dev server
-npm run db:push    # apply supabase migrations (dev)
-npm run db:types   # generate TypeScript types
-```
-
-## Key features & functionality
-
-- **Survey builder**: Create surveys with multiple question types (text, multiple choice, rating, yes/no) and reorder questions.
-- **Versioning & changelogs**: Track changes and maintain previous versions of a survey.
-- **Response collection**: Public shareable links for collecting responses; supports anonymous responses.
-- **Realtime activity feed**: Live updates using Supabase Realtime and webhook-driven event logging.
-- **Analytics & AI**: Dashboard metrics plus optional OpenAI-powered question suggestions, sentiment analysis, and response summaries.
-- **Extensible API**: Server endpoints and modular lib code for adding integrations or custom processing.
-
-## Assumptions & limitations
-
-- Designed primarily as a demo / lightweight production prototype — not an enterprise-grade survey platform.
-- AI features require a valid `OPENAI_API_KEY` and are optional; the app gracefully falls back when unavailable.
-- Supabase is required for persistence and realtime features; Row Level Security (RLS) is assumed to be configured via migrations.
-- No full multi-tenant user-management is implemented beyond organization IDs; add custom auth for stricter isolation.
-- Not optimized for extremely high scale (millions of responses) without adding pagination, caching, and horizontal scaling.
 
 ## 📑 Table of Contents
 
@@ -121,7 +87,6 @@ Businesses struggle to:
 
 ### 📈 Real-Time Dashboard
 - **Live activity feed** - See surveys created, responses received, analysis completed
-- **Sentiment distribution** - Pie charts showing sentiment breakdown
 - **Response tracking** - Monitor response count and engagement
 - **Survey management** - View, edit, delete, and analyze all surveys in one place
 - **Analytics per survey** - Deep dive into individual survey performance
@@ -482,72 +447,21 @@ To enable AI features:
 
 ### Current Assumptions
 
-**1. Single Organization Model**
-- The app currently operates under a single default organization (`NEXT_PUBLIC_DEFAULT_ORG_ID`)
-- All surveys and responses belong to this one organization
-- Multi-tenancy is not yet implemented
-- **Rationale:** Simplifies demo/portfolio scope while maintaining production-ready architecture
-
-**2. Authentication Disabled for Demo**
-- Row Level Security (RLS) policies are currently permissive (`USING (true)`)
-- No user login or session management
-- Anyone can create, edit, or delete surveys
-- **Rationale:** Allows easy testing without auth setup barriers
-- **Migration Path:** RLS policies are ready—just needs Supabase Auth integration (3-4 days)
-
-**3. OpenAI Optional**
-- AI features gracefully fallback to mock analysis if API key is missing
-- Mock analysis uses basic keyword matching
-- **Rationale:** App remains functional without paid API keys
-
-**4. Anonymous Responses**
-- No respondent authentication or tracking
-- Cannot prevent duplicate responses from the same person
-- No email validation or identity verification
-- **Rationale:** Maximizes response rate by removing friction
-
-**5. Local Development Focus**
-- Optimized for localhost testing and development
-- Production deployment requires additional hardening
-- **Rationale:** Portfolio/internship project scope
+- **Single Organization Model:** All surveys share one default organization (`NEXT_PUBLIC_DEFAULT_ORG_ID`); multi-tenancy not yet implemented.  
+- **Authentication Disabled:** For demo simplicity; RLS policies are permissive (`USING (true)`).  
+- **Optional AI:** OpenAI integration is optional; falls back to mock analysis.  
+- **Anonymous Responses:** No respondent tracking or email validation.  
+- **Local Development Focus:** Tuned for localhost testing and small production demos.  
 
 ### Known Limitations
 
-**Security & Production Readiness**
-- ❌ **No authentication system** - Anyone can access admin features
-- ❌ **No webhook signature validation** - Webhook endpoint is unprotected
-- ❌ **No rate limiting** - API routes can be spammed
-- ❌ **Manual transaction rollback** - Not atomic (see TECH_DEBT_ASSESSMENT.md)
-- ⚠️ **Service role used in API routes** - Bypasses RLS (acceptable for single-org demo)
-
-**Features Not Yet Implemented**
-- ❌ **NPS (Net Promoter Score) calculation** - Planned for Phase 3
-- ❌ **User roles and permissions** - Admin, Editor, Viewer
-- ❌ **Email notifications** - For new responses or negative sentiment
-- ❌ **Export functionality** - CSV/Excel/PDF reports
-- ❌ **Survey templates library** - Pre-built industry templates
-- ❌ **Conditional branching** - Skip logic based on answers
-- ❌ **Multi-language support** - Currently English only
-- ❌ **Response editing** - Once submitted, cannot be modified
-- ❌ **Survey scheduling** - No start/end dates for surveys
-
-**Scalability Considerations**
-- ⚠️ **No query pagination** - Dashboard loads all surveys (fine for <1000 surveys)
-- ⚠️ **No caching strategy** - Every page load queries database
-- ⚠️ **No database connection pooling** - Default Supabase limits apply
-- ⚠️ **No CDN for assets** - Served directly from Next.js (Vercel handles in production)
-
-**Data & Analytics**
-- ⚠️ **Basic sentiment analysis only** - No topic clustering or trend analysis
-- ⚠️ **No comparative benchmarking** - Cannot compare against industry averages
-- ⚠️ **Limited data visualization** - Basic pie charts and tables
-- ⚠️ **No custom dashboards** - Fixed dashboard layout
-
-**Integration Limitations**
-- ❌ **No actual MoFlo integrations** - Architecture ready, but APIs not connected
-- ❌ **No Zapier/webhook API** - Cannot trigger external automations
-- ❌ **No email embedding** - Cannot directly embed surveys in emails
-- ❌ **No iframe/widget support** - Cannot embed on external websites
+- ❌ **No authentication or user roles yet**  
+- ❌ **No NPS (Net Promoter Score) tracking**  
+- ❌ **No conditional branching or multi-language support**  
+- ❌ **No webhook signature validation or rate limiting**  
+- ⚠️ **Basic sentiment analysis** (no topic clustering)  
+- ⚠️ **Not optimized for high-scale workloads** (no caching or pagination)  
+- ⚠️ **Manual rollback** (transactions not yet atomic)
 
 ### What This Means For You
 
@@ -563,13 +477,6 @@ To enable AI features:
 - Multi-tenant SaaS (requires auth + org isolation)
 - High-volume response collection (needs rate limiting + caching)
 - Sensitive data collection (needs encryption + compliance)
-
-**🚀 Production Readiness Estimate:**
-- **Basic security fixes:** 3-4 days
-- **Full authentication:** 1 week
-- **Enterprise features:** 2-3 months
-
-See `TECH_DEBT_ASSESSMENT.md` for detailed technical audit and roadmap.
 
 ---
 
