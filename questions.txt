@@ -1,0 +1,38 @@
+1.) 
+The product’s name is MoSurveys.
+
+2.) 
+MoSurveys is an AI-powered survey management platform built for small and medium-sized businesses that want to 
+understand their customers without needing a full data science or analytics team. 
+It connects to Supabase for data persistence and real-time activity feeds, Vercel for deployment, and 
+OpenAI’s GPT-4 mini model for AI-assisted question generation and sentiment analysis. The app enables 
+the full feedback lifecycle: create, collect, analyze, and iterate — within the MoFlo Cloud ecosystem. 
+Its core features include AI-powered survey creation, real-time response collection through live links and webhooks, 
+and an analytics dashboard that provides sentiment analysis, response time tracking, and other insights. There’s also a 
+simple version control system that allows users to manage survey versions, view changelogs, and track edits.
+
+
+3.) 
+I decided to make this product because it provides real business value for small and medium-sized companies 
+that don’t have the resources to hire a full analytics team. It’s an affordable and automated way to gather customer 
+feedback and extract actionable insights that can help improve their products and services. Instead of manually analyzing 
+survey data, businesses can rely on MoSurveys to handle generation, collection, and analysis in one platform.
+
+
+4.) 
+MoFlo clients would be interested in this product because it integrates directly into their existing ecosystem 
+of tools and simplifies how they gather and use feedback. For example, a small marketing agency using Google Forms 
+might struggle to extract insights from responses stored in Google Sheets. MoSurveys automates that process by generating 
+AI-powered analytics and visualizations. It also eliminates the need to switch between multiple tools like Google Forms, 
+Mailchimp, or spreadsheets, keeping everything centralized within MoFlo Cloud. This makes it easier for small business owners 
+to act on data quickly and confidently.
+
+
+5.) 
+If I had more time to improve or expand MoSurveys, I would start by implementing authentication so that each business or 
+organization has its own org ID instead of everything being hardcoded. I’d also add rate limiting and better token management 
+for the OpenAI API, as well as enhanced analytics such as NPS (Net Promoter Score) tracking and deeper sentiment analysis. Expanding 
+the available question types would be another priority, including matrix grid questions, file uploads, and conditional branching 
+based on previous responses. I’d also like to add real-time collaboration features, similar to how Google Forms allows multiple 
+users to edit simultaneously. On the technical side, I’d optimize webhooks for multi-organization setups and integrate production-grade 
+logging using tools like Sentry, Datadog and Trigger. Overall, these improvements would make the platform more scalable, secure, and powerful for long-term use.
